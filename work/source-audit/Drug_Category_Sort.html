@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Drug Category Sort — Year 8 Health</title>
+<style>
+  :root {
+    --ink: #2e2f5b;
+    --paper: #eef2f9;
+    --card-paper: #ffffff;
+    --line: #d6deee;
+    --stim: #c1521a;   --stim-bg: #fbe9dc;
+    --dep: #1f5f8b;    --dep-bg: #dcedf7;
+    --hall: #6b3fa0;   --hall-bg: #ece2f7;
+    --opi: #a3243c;    --opi-bg: #f9dee2;
+    --common: #1f7a52; --common-bg: #dcf2e6;
+    --accent: #2e2f5b;
+    --ok: #1f7a52;
+    --bad: #a3243c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: 'Iowan Old Style','Georgia',serif;
+    background: var(--paper); color: var(--ink); padding: 32px 20px 80px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  header.page-head { text-align: center; margin-bottom: 24px; }
+  .eyebrow {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent);
+    font-weight: 700; margin-bottom: 6px;
+  }
+  h1 { font-size: 36px; margin: 0 0 8px; font-weight: 700; letter-spacing: -0.01em; }
+  .subtitle {
+    font-family: 'Helvetica Neue', Arial, sans-serif; color: #5b5a55;
+    font-size: 14.5px; max-width: 680px; margin: 0 auto; line-height: 1.55;
+  }
+  .mode-bar { display: flex; justify-content: center; gap: 10px; margin: 24px 0 8px; font-family: 'Helvetica Neue', Arial, sans-serif; }
+  .mode-btn {
+    border: 1.5px solid var(--ink); background: transparent; color: var(--ink);
+    padding: 10px 20px; font-size: 13px; font-weight: 600; letter-spacing: 0.02em;
+    border-radius: 999px; cursor: pointer; transition: all 0.15s ease;
+  }
+  .mode-btn.active { background: var(--ink); color: var(--paper); }
+  .mode-btn:hover { transform: translateY(-1px); }
+  .mode-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  .toolbar { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 14px 0 26px; font-family: 'Helvetica Neue', Arial, sans-serif; align-items: center; }
+  .tool-btn {
+    border: none; background: var(--card-paper); box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    color: var(--ink); padding: 8px 16px; font-size: 13px; border-radius: 8px; cursor: pointer;
+  }
+  .tool-btn:hover { background: #fff; }
+  .tool-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .tool-btn.primary { background: var(--ink); color: var(--paper); }
+
+  .score-pill {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13px; font-weight: 700;
+    background: var(--card-paper); padding: 8px 16px; border-radius: 999px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .instructions {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13.5px; color: #5b5a55;
+    text-align: center; max-width: 680px; margin: 0 auto 26px; line-height: 1.6;
+  }
+  .instructions b { color: var(--ink); }
+
+  /* ── SORT BOARD ─────────────────────────────────────────── */
+  #board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 30px; }
+  @media (max-width: 980px) { #board { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { #board { grid-template-columns: 1fr; } }
+
+  .bucket {
+    border-radius: 14px; border: 2px dashed var(--line); min-height: 200px;
+    display: flex; flex-direction: column; padding: 10px;
+    transition: box-shadow 0.15s ease;
+  }
+  .bucket.dragover { box-shadow: 0 0 0 3px var(--accent) inset; }
+
+  .bucket-head {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: 700;
+    font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.04em;
+    padding: 8px 10px; border-radius: 8px; text-align: center; margin-bottom: 8px;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .bucket-head svg { width: 26px; height: 26px; }
+  .bucket-cards { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+
+  .stimulant-b .bucket-head { background: var(--stim); color: #fff; }
+  .stimulant-b { border-color: var(--stim); }
+  .depressant-b .bucket-head { background: var(--dep); color: #fff; }
+  .depressant-b { border-color: var(--dep); }
+  .hallucinogen-b .bucket-head { background: var(--hall); color: #fff; }
+  .hallucinogen-b { border-color: var(--hall); }
+  .opioid-b .bucket-head { background: var(--opi); color: #fff; }
+  .opioid-b { border-color: var(--opi); }
+  .common-b .bucket-head { background: var(--common); color: #fff; }
+  .common-b { border-color: var(--common); }
+
+  /* ── CARD BANK ─────────────────────────────────────────── */
+  .bank-label {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em; color: #8a8880; text-align: center; margin-bottom: 10px;
+  }
+  #bank {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+    padding: 18px; background: var(--card-paper); border-radius: 14px; min-height: 90px;
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+
+  /* ── CARDS (interactive) ─────────────────────────────────── */
+  .sort-card {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12.5px;
+    background: #fff; border: 1.5px solid var(--line); border-radius: 9px;
+    padding: 8px 10px; cursor: pointer; user-select: none; line-height: 1.35;
+    max-width: 190px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); position: relative;
+  }
+  .sort-card.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+  .sort-card .tag {
+    display: inline-block; font-size: 9.5px; font-weight: 700; letter-spacing: 0.04em;
+    text-transform: uppercase; color: #8a8880; margin-bottom: 3px;
+  }
+  .sort-card.drug-card { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13.5px; }
+  .sort-card.drug-card svg { width: 22px; height: 22px; flex-shrink: 0; stroke: var(--ink); }
+  .sort-card.correct { border-color: var(--ok); box-shadow: 0 0 0 2px var(--ok); background: #eef8f2; }
+  .sort-card.incorrect { border-color: var(--bad); box-shadow: 0 0 0 2px var(--bad); background: #fbeceb; }
+  .mark { position: absolute; top: -8px; right: -8px; font-size: 14px; background:#fff; border-radius: 50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+
+  /* ── LEGEND ─────────────────────────────────────────────── */
+  .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; margin: 8px 0 22px; color: #4a4944; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+  /* ── PRINT MODE ───────────────────────────────────────────── */
+  #print-mode { display: none; }
+  #print-mode.active { display: block; }
+
+  .print-section-title {
+    font-size: 20px; font-weight: 700; text-align: center; margin: 30px 0 6px;
+  }
+  .print-section-sub {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12.5px; color: #5b5a55;
+    text-align: center; max-width: 600px; margin: 0 auto 16px; line-height: 1.5;
+  }
+
+  .header-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 8px; }
+  .print-header-card {
+    border-radius: 10px; padding: 16px 8px; text-align: center;
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: 700; font-size: 13px;
+    text-transform: uppercase; letter-spacing: 0.03em; border: 2px dashed #9c9890;
+  }
+  .print-header-card svg { width: 30px; height: 30px; margin-bottom: 6px; }
+  .print-header-card.stimulant { background: var(--stim-bg); color: var(--stim); }
+  .print-header-card.depressant { background: var(--dep-bg); color: var(--dep); }
+  .print-header-card.hallucinogen { background: var(--hall-bg); color: var(--hall); }
+  .print-header-card.opioid { background: var(--opi-bg); color: var(--opi); }
+  .print-header-card.common { background: var(--common-bg); color: var(--common); }
+
+  .print-card-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+    background: var(--card-paper); border: 1px solid var(--ink); margin-top: 16px;
+  }
+  @media (max-width: 700px) { .print-card-grid { grid-template-columns: repeat(2,1fr); } }
+
+  .print-sort-card {
+    border: 1px dashed #9c9890; padding: 14px 10px; min-height: 90px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center; page-break-inside: avoid; background: #fff;
+  }
+  .print-sort-card .tag {
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em; color: #9c9890; margin-bottom: 4px;
+  }
+  .print-sort-card.drug-card { flex-direction: row; gap: 8px; text-align: left; }
+  .print-sort-card.drug-card svg { width: 24px; height: 24px; flex-shrink: 0; stroke: var(--ink); }
+  .print-sort-card .card-text { font-size: 13px; font-weight: 600; line-height: 1.3; }
+
+  .answer-key { margin-top: 40px; padding-top: 20px; border-top: 3px double var(--ink); }
+  .answer-key-banner {
+    background: var(--ink); color: var(--paper); text-align: center; padding: 10px;
+    font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: 700; font-size: 13px;
+    letter-spacing: 0.04em; text-transform: uppercase; border-radius: 8px; margin-bottom: 18px;
+  }
+  .key-table { width: 100%; border-collapse: collapse; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13px; }
+  .key-table th, .key-table td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  .key-table th { background: var(--ink); color: #fff; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .key-table tr:nth-child(even) { background: #f0ede4; }
+
+  footer.note { text-align: center; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11.5px; color: #9a988f; margin-top: 40px; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .mode-bar, .toolbar, .legend, header.page-head, footer.note, .instructions, .score-pill { display: none !important; }
+    #board, .bank-label, #bank { display: none !important; }
+    #print-mode { display: block !important; }
+    .print-card-grid, .header-grid { border-color: #000; }
+    .answer-key { page-break-before: always; }
+  }
+  .no-print-key .answer-key { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page-head">
+    <div class="eyebrow">Year 8 Health — Drug Education</div>
+    <h1>Drug Category Sort</h1>
+    <p class="subtitle">Sort each <b>drug name</b> and each <b>effect</b> into the correct category. Some effects belong to a specific drug type — others belong on the green <b>"Common to All Drugs"</b> card because they can happen with any drug.</p>
+  </header>
+
+  <div class="mode-bar">
+    <button class="mode-btn active" id="btn-study" onclick="setMode('study')">🖱️ Sort Online</button>
+    <button class="mode-btn" id="btn-print" onclick="setMode('print')">🖨️ Printable Cards</button>
+  </div>
+
+  <div class="toolbar" id="study-toolbar">
+    <button class="tool-btn primary" onclick="checkSorting()">✓ Check My Sorting</button>
+    <button class="tool-btn" onclick="shuffleBank()">🔀 Shuffle</button>
+    <button class="tool-btn" onclick="resetBoard()">↺ Reset All</button>
+    <span class="score-pill" id="score-pill">0 / 32 placed</span>
+  </div>
+  <div class="toolbar" id="print-toolbar" style="display:none;">
+    <button class="tool-btn primary" onclick="window.print()">🖨️ Print This Page</button>
+    <label style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;display:flex;align-items:center;gap:6px;">
+      <input type="checkbox" id="key-toggle" checked onchange="toggleKey()"> Include teacher answer key
+    </label>
+  </div>
+
+  <p class="instructions" id="study-instructions"><b>How to play:</b> Click a card below to select it, then click a category bucket to drop it in. Click a placed card to send it back. When you've sorted everything, hit "Check My Sorting."</p>
+
+  <div class="legend">
+    <span><i class="dot" style="background:var(--stim)"></i>Stimulant</span>
+    <span><i class="dot" style="background:var(--dep)"></i>Depressant</span>
+    <span><i class="dot" style="background:var(--hall)"></i>Hallucinogen</span>
+    <span><i class="dot" style="background:var(--opi)"></i>Opioid</span>
+    <span><i class="dot" style="background:var(--common)"></i>Common to All Drugs</span>
+  </div>
+
+  <!-- ══════════════ STUDY MODE ══════════════ -->
+  <div id="study-mode">
+    <div id="board"></div>
+    <div class="bank-label">Drag bank — click a card, then click a bucket</div>
+    <div id="bank"></div>
+  </div>
+
+  <!-- ══════════════ PRINT MODE ══════════════ -->
+  <div id="print-mode">
+    <p class="print-section-title">Step 1 — Category Headers</p>
+    <p class="print-section-sub">Cut these out and place them as headings on the desk or wall to create five sorting zones.</p>
+    <div class="header-grid" id="header-grid"></div>
+
+    <p class="print-section-title">Step 2 — Cards to Sort</p>
+    <p class="print-section-sub">Cut out every card below. Sort each <b>drug name</b> and each <b>effect</b> under the correct category heading.</p>
+    <div class="print-card-grid" id="print-card-grid"></div>
+
+    <div class="answer-key" id="answer-key">
+      <div class="answer-key-banner">Teacher Answer Key — Not for Student Distribution</div>
+      <table class="key-table">
+        <thead><tr><th>Card</th><th>Type</th><th>Correct Category</th></tr></thead>
+        <tbody id="key-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer class="note">Icons are simple illustrations for classroom use only.</footer>
+</div>
+
+<script>
+// ── Icons ──────────────────────────────────────────────────────────────
+const icons = {
+  coffee: `<svg viewBox="0 0 64 64" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M14 26h30v16a10 10 0 0 1-10 10H24a10 10 0 0 1-10-10V26Z"/><path d="M44 30h4a6 6 0 0 1 0 12h-4"/><path d="M20 14c0 3-3 3-3 6M28 14c0 3-3 3-3 6M36 14c0 3-3 3-3 6"/></svg>`,
+  cigarette: `<svg viewBox="0 0 64 64" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="28" width="40" height="10" rx="2"/><rect x="40" y="28" width="10" height="10" rx="1"/><path d="M52 24c2 2 2 6 0 8M57 21c3 3 3 11 0 14"/></svg>`,
+  mound: `<svg viewBox="0 0 64 64" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M8 48c4-18 16-30 24-30s20 12 24 30"/><path d="M8 48h48"/><circle cx="32" cy="24" r="2" fill="currentColor" stroke="none"/></svg>`,
+  wine: `<svg viewBox="0 0 64 64" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10h24l-3 20a9 9 0 0 1-18 0L20 10Z"/><path d="M32 34v18M22 52h20"/></svg>`,
+  pillbottle: `<svg viewBox="0 0 64 64" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="18" y="18" width="28" height="34" rx="3"/><rect x="24" y="10" width="16" height="8" rx="1"/><path d="M18 30h28"/></svg>`,
+  spiral: `<svg viewBox="0 0 64 64" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M32 32c0-4 4-6 7-3s2 8-3 9-9-3-8-9 7-11 14-9 9 12 4 17"/></svg>`,
+  mushroom: `<svg viewBox="0 0 64 64" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M10 28c0-12 10-18 22-18s22 6 22 18c-6 3-16 4-22 4s-16-1-22-4Z"/><path d="M26 32v14a6 6 0 0 0 12 0V32"/></svg>`,
+  capsule: `<svg viewBox="0 0 64 64" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="26" width="48" height="12" rx="6"/><path d="M32 26v12"/></svg>`,
+  warning: `<svg viewBox="0 0 64 64" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M32 10 58 50H6L32 10Z"/><path d="M32 26v14M32 46v.5"/></svg>`,
+  bolt: `<svg viewBox="0 0 64 64" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M34 8 14 36h14l-4 20 22-30H32l2-18Z"/></svg>`,
+  moon: `<svg viewBox="0 0 64 64" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M40 10a22 22 0 1 0 14 38 18 18 0 0 1-14-38Z"/></svg>`,
+  eye: `<svg viewBox="0 0 64 64" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 32s10-16 26-16 26 16 26 16-10 16-26 16S6 32 6 32Z"/><circle cx="32" cy="32" r="7"/></svg>`,
+  drop: `<svg viewBox="0 0 64 64" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M32 8c10 14 18 24 18 34a18 18 0 0 1-36 0c0-10 8-20 18-34Z"/></svg>`
+};
+
+// ── Category definitions ─────────────────────────────────────────────
+const categories = [
+  { id: 'stimulant',    label: 'Stimulant',           icon: 'bolt' },
+  { id: 'depressant',   label: 'Depressant',          icon: 'moon' },
+  { id: 'hallucinogen', label: 'Hallucinogen',        icon: 'eye'  },
+  { id: 'opioid',       label: 'Opioid',               icon: 'drop' },
+  { id: 'common',       label: 'Common to All Drugs', icon: 'warning' },
+];
+
+// ── Card data ──────────────────────────────────────────────────────────
+// type: 'drug' | 'effect'
+// timeTag (for effects): 'Short-Term' | 'Long-Term' | 'Any Drug'
+let cards = [
+  { id:'d1', type:'drug', text:'Caffeine',    icon:'coffee',     category:'stimulant' },
+  { id:'e5', type:'effect', timeTag:'Short-Term', text:'Slowed reactions', category:'depressant' },
+  { id:'c3', type:'effect', timeTag:'Long-Term', text:'Tolerance — needing more for the same effect', category:'common' },
+  { id:'d6', type:'drug', text:'LSD',         icon:'spiral',     category:'hallucinogen' },
+  { id:'e13', type:'effect', timeTag:'Short-Term', text:'Pain relief', category:'opioid' },
+  { id:'d4', type:'drug', text:'Alcohol',     icon:'wine',       category:'depressant' },
+  { id:'e1', type:'effect', timeTag:'Short-Term', text:'Increased heart rate', category:'stimulant' },
+  { id:'c6', type:'effect', timeTag:'Long-Term', text:'Impact on relationships, school or work', category:'common' },
+  { id:'d9', type:'drug', text:'Morphine',    icon:'capsule',    category:'opioid' },
+  { id:'e9',  type:'effect', timeTag:'Short-Term', text:'Hallucinations', category:'hallucinogen' },
+  { id:'d2', type:'drug', text:'Nicotine',    icon:'cigarette',  category:'stimulant' },
+  { id:'e14', type:'effect', timeTag:'Short-Term', text:'Slowed breathing', category:'opioid' },
+  { id:'c1', type:'effect', timeTag:'Long-Term', text:'Dependence — needing the drug to feel normal', category:'common' },
+  { id:'d7', type:'drug', text:'Magic Mushrooms', icon:'mushroom', category:'hallucinogen' },
+  { id:'e6', type:'effect', timeTag:'Short-Term', text:'Drowsiness and relaxation', category:'depressant' },
+  { id:'d10',type:'drug', text:'Codeine',     icon:'capsule',    category:'opioid' },
+  { id:'e2', type:'effect', timeTag:'Short-Term', text:'Feeling more alert or energetic', category:'stimulant' },
+  { id:'c4', type:'effect', timeTag:'Long-Term', text:'Cravings', category:'common' },
+  { id:'d5', type:'drug', text:'Benzodiazepines', icon:'pillbottle', category:'depressant' },
+  { id:'e10', type:'effect', timeTag:'Short-Term', text:'Altered sense of time', category:'hallucinogen' },
+  { id:'d3', type:'drug', text:'Cocaine',     icon:'mound',      category:'stimulant' },
+  { id:'e15', type:'effect', timeTag:'Long-Term',  text:'High risk of overdose', category:'opioid' },
+  { id:'c5', type:'effect', timeTag:'Long-Term', text:'Mood and behaviour changes', category:'common' },
+  { id:'e7', type:'effect', timeTag:'Long-Term',  text:'Memory problems', category:'depressant' },
+  { id:'d8', type:'drug', text:'Heroin',      icon:'capsule',    category:'opioid' },
+  { id:'e3', type:'effect', timeTag:'Long-Term',  text:'Ongoing sleep problems', category:'stimulant' },
+  { id:'e11', type:'effect', timeTag:'Long-Term',  text:'Flashbacks', category:'hallucinogen' },
+  { id:'c2', type:'effect', timeTag:'Long-Term', text:'Withdrawal symptoms when stopping', category:'common' },
+  { id:'e4', type:'effect', timeTag:'Long-Term',  text:'High blood pressure over time', category:'stimulant' },
+  { id:'e8', type:'effect', timeTag:'Long-Term',  text:'Liver or organ damage', category:'depressant' },
+  { id:'e16', type:'effect', timeTag:'Long-Term',  text:'Severe physical dependence', category:'opioid' },
+  { id:'e12', type:'effect', timeTag:'Long-Term',  text:'Ongoing anxiety', category:'hallucinogen' },
+];
+
+let placements = {}; // cardId -> bucketId
+let selectedCard = null;
+
+// ── Build board ────────────────────────────────────────────────────────
+const board = document.getElementById('board');
+categories.forEach(cat => {
+  const div = document.createElement('div');
+  div.className = `bucket ${cat.id}-b`;
+  div.dataset.bucket = cat.id;
+  div.innerHTML = `
+    <div class="bucket-head">${icons[cat.icon]}<span>${cat.label}</span></div>
+    <div class="bucket-cards" data-bucket-cards="${cat.id}"></div>
+  `;
+  div.addEventListener('click', () => {
+    if (selectedCard) placeCard(selectedCard, cat.id);
+  });
+  board.appendChild(div);
+});
+
+function renderCard(card) {
+  const div = document.createElement('div');
+  div.className = `sort-card ${card.type === 'drug' ? 'drug-card' : ''}`;
+  div.dataset.id = card.id;
+  if (card.type === 'drug') {
+    div.innerHTML = `${icons[card.icon]}<span>${card.text}</span>`;
+  } else {
+    div.innerHTML = `<span class="tag">${card.timeTag}</span><div>${card.text}</div>`;
+  }
+  div.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (placements[card.id]) {
+      // already placed -> return to bank
+      delete placements[card.id];
+      renderAll();
+    } else {
+      selectedCard = (selectedCard === card.id) ? null : card.id;
+      renderAll();
+    }
+  });
+  if (selectedCard === card.id) div.classList.add('selected');
+  return div;
+}
+
+function placeCard(cardId, bucketId) {
+  placements[cardId] = bucketId;
+  selectedCard = null;
+  renderAll();
+}
+
+function renderAll() {
+  // clear bucket-cards
+  categories.forEach(cat => {
+    const container = document.querySelector(`[data-bucket-cards="${cat.id}"]`);
+    container.innerHTML = '';
+  });
+  const bank = document.getElementById('bank');
+  bank.innerHTML = '';
+
+  cards.forEach(card => {
+    const el = renderCard(card);
+    if (placements[card.id]) {
+      document.querySelector(`[data-bucket-cards="${placements[card.id]}"]`).appendChild(el);
+    } else {
+      bank.appendChild(el);
+    }
+  });
+
+  const placedCount = Object.keys(placements).length;
+  document.getElementById('score-pill').textContent = `${placedCount} / ${cards.length} placed`;
+}
+
+function checkSorting() {
+  document.querySelectorAll('.sort-card').forEach(el => {
+    el.classList.remove('correct','incorrect');
+    const mark = el.querySelector('.mark');
+    if (mark) mark.remove();
+  });
+  let correct = 0, placed = 0;
+  cards.forEach(card => {
+    if (placements[card.id]) {
+      placed++;
+      const el = document.querySelector(`.sort-card[data-id="${card.id}"]`);
+      const isRight = placements[card.id] === card.category;
+      if (isRight) correct++;
+      el.classList.add(isRight ? 'correct' : 'incorrect');
+      const mark = document.createElement('span');
+      mark.className = 'mark';
+      mark.textContent = isRight ? '✓' : '✗';
+      el.appendChild(mark);
+    }
+  });
+  document.getElementById('score-pill').textContent = `${correct} / ${cards.length} correct (${placed} placed)`;
+}
+
+function shuffleBank() {
+  cards = [...cards].sort(() => Math.random() - 0.5);
+  renderAll();
+}
+
+function resetBoard() {
+  placements = {};
+  selectedCard = null;
+  renderAll();
+}
+
+renderAll();
+
+// ── Print mode build ──────────────────────────────────────────────────
+const headerGrid = document.getElementById('header-grid');
+categories.forEach(cat => {
+  const div = document.createElement('div');
+  div.className = `print-header-card ${cat.id}`;
+  div.innerHTML = `${icons[cat.icon]}<div>${cat.label}</div>`;
+  headerGrid.appendChild(div);
+});
+
+const printCardGrid = document.getElementById('print-card-grid');
+cards.forEach(card => {
+  const div = document.createElement('div');
+  div.className = `print-sort-card ${card.type === 'drug' ? 'drug-card' : ''}`;
+  if (card.type === 'drug') {
+    div.innerHTML = `${icons[card.icon]}<div class="card-text">${card.text}</div>`;
+  } else {
+    div.innerHTML = `<div class="tag">${card.timeTag}</div><div class="card-text">${card.text}</div>`;
+  }
+  printCardGrid.appendChild(div);
+});
+
+const keyBody = document.getElementById('key-body');
+const catLabel = id => categories.find(c => c.id === id).label;
+cards.forEach(card => {
+  const tr = document.createElement('tr');
+  const typeLabel = card.type === 'drug' ? 'Drug name' : card.timeTag + ' effect';
+  tr.innerHTML = `<td>${card.text}</td><td>${typeLabel}</td><td><b>${catLabel(card.category)}</b></td>`;
+  keyBody.appendChild(tr);
+});
+
+function toggleKey() {
+  const checked = document.getElementById('key-toggle').checked;
+  document.getElementById('answer-key').style.display = checked ? 'block' : 'none';
+}
+
+// ── Mode toggle ────────────────────────────────────────────────────────
+function setMode(mode) {
+  const study = document.getElementById('study-mode');
+  const print = document.getElementById('print-mode');
+  const studyToolbar = document.getElementById('study-toolbar');
+  const printToolbar = document.getElementById('print-toolbar');
+  const btnStudy = document.getElementById('btn-study');
+  const btnPrint = document.getElementById('btn-print');
+  const instr = document.getElementById('study-instructions');
+
+  if (mode === 'study') {
+    study.style.display = 'block';
+    print.classList.remove('active');
+    studyToolbar.style.display = 'flex';
+    printToolbar.style.display = 'none';
+    instr.style.display = 'block';
+    btnStudy.classList.add('active');
+    btnPrint.classList.remove('active');
+  } else {
+    study.style.display = 'none';
+    print.classList.add('active');
+    studyToolbar.style.display = 'none';
+    printToolbar.style.display = 'flex';
+    instr.style.display = 'none';
+    btnStudy.classList.remove('active');
+    btnPrint.classList.add('active');
+  }
+}
+</script>
+
+<!-- Read aloud (accessibility support; self-contained, no libraries, no data collected) -->
+<script>
+(function(){
+  if(!('speechSynthesis' in window)) return;            // unsupported: add nothing
+  var wrap = document.querySelector('.wrap') || document.body;
+  var h1 = wrap.querySelector('h1');
+  if(!h1) return;
+
+  // Button styling (uses the page's palette tokens, with safe fallbacks)
+  if(!document.querySelector('style[data-readaloud]')){
+    var st = document.createElement('style');
+    st.setAttribute('data-readaloud','');
+    st.textContent =
+      '.readrow{margin:10px 0 16px;}'+
+      '.ra-btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line,#d6deee);'+
+      'background:#fff;color:var(--navy,#2e2f5b);font-family:inherit;font-size:13px;font-weight:600;'+
+      'padding:8px 14px;border-radius:999px;cursor:pointer;}'+
+      '.ra-btn:hover{background:#f2f6fc;}'+
+      '.ra-btn:focus-visible{outline:3px solid var(--navy,#2e2f5b);outline-offset:2px;}'+
+      '.ra-btn[aria-pressed="true"]{background:var(--navy,#2e2f5b);color:#fff;border-color:var(--navy,#2e2f5b);}';
+    document.head.appendChild(st);
+  }
+
+  // Build the button and place it after the intro (or the heading if there is none)
+  var row = document.createElement('div'); row.className='readrow';
+  var btn = document.createElement('button');
+  btn.type='button'; btn.className='ra-btn'; btn.setAttribute('aria-pressed','false');
+  btn.setAttribute('aria-label','Read this activity aloud');
+  btn.textContent='🔊 Read aloud';
+  row.appendChild(btn);
+  var anchor = wrap.querySelector('.intro, .lead, .sub') || h1;
+  anchor.parentNode.insertBefore(row, anchor.nextSibling);
+
+  // Collect the visible, readable text from the live page (skips controls + chrome + hidden bits)
+  var SKIP='button,.btn,.opt,.iconbtn,.ra-btn,select,option,input,textarea,.eyebrow,.prog,.progress,.count,.score,footer,.readrow';
+  function readable(){
+    var parts=[], walker=document.createTreeWalker(wrap, NodeFilter.SHOW_TEXT, {
+      acceptNode:function(n){
+        if(!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        var p=n.parentElement; if(!p) return NodeFilter.FILTER_REJECT;
+        if(p.closest(SKIP)) return NodeFilter.FILTER_REJECT;
+        var s=window.getComputedStyle(p);
+        if(s.display==='none'||s.visibility==='hidden'||parseFloat(s.opacity)===0) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    var n; while(n=walker.nextNode()){ parts.push(n.nodeValue.trim()); }
+    return parts.join(' ').replace(/\s+/g,' ').replace(/[\u2019]/g,"'").trim();
+  }
+
+  var speaking=false;
+  function stop(){ try{speechSynthesis.cancel();}catch(e){} speaking=false; btn.setAttribute('aria-pressed','false'); }
+  function start(){
+    stop();
+    var text=readable(); if(!text) return;
+    var u=new SpeechSynthesisUtterance(text); u.rate=0.95;
+    u.onend=function(){ speaking=false; btn.setAttribute('aria-pressed','false'); };
+    u.onerror=function(){ speaking=false; btn.setAttribute('aria-pressed','false'); };
+    speechSynthesis.speak(u); speaking=true; btn.setAttribute('aria-pressed','true');
+  }
+  btn.addEventListener('click', function(){ speaking?stop():start(); });
+  document.addEventListener('visibilitychange', function(){ if(document.hidden) stop(); });
+  window.addEventListener('pagehide', stop);
+})();
+</script>
+
+<!-- Per-label read aloud for sorters/classify activities (self-contained, no libraries, no data collected) -->
+<script>
+(function(){
+  if(!('speechSynthesis' in window)) return;
+  var root = document.querySelector('.wrap') || document.body;
+
+  var hasBuckets  = document.querySelector('.sort-card') || document.querySelector('.bucket-head');
+  var hasClassify = document.querySelector('.item .q');
+  if(!hasBuckets && !hasClassify) return;   // not a sorter/classify page: add nothing
+
+  if(!document.querySelector('style[data-readsay]')){
+    var st=document.createElement('style'); st.setAttribute('data-readsay','');
+    st.textContent =
+      '.ra-say{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;'+
+      'width:26px;height:26px;margin-left:6px;padding:0;border-radius:999px;cursor:pointer;'+
+      'border:1px solid var(--line,#d6deee);background:#fff;color:var(--navy,#2e2f5b);'+
+      'font-size:13px;line-height:1;vertical-align:middle;}'+
+      '.ra-say:hover{background:#f2f6fc;}'+
+      '.ra-say:focus-visible{outline:3px solid var(--navy,#2e2f5b);outline-offset:2px;}'+
+      '.ra-say[aria-pressed="true"]{background:var(--navy,#2e2f5b);color:#fff;border-color:var(--navy,#2e2f5b);}'+
+      '.bucket-head .ra-say{background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.55);color:#fff;}'+
+      '.bucket-head .ra-say:hover{background:rgba(255,255,255,.4);}'+
+      '.bucket-head .ra-say[aria-pressed="true"]{background:#fff;color:var(--navy,#2e2f5b);}'+
+      '.ra-catstrip{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px;}'+
+      '.ra-catstrip .ra-lab{font-size:13px;font-weight:600;color:var(--muted,#5b5d86);}'+
+      '.ra-cat{display:inline-flex;align-items:center;font-size:13px;font-weight:600;'+
+      'color:var(--navy,#2e2f5b);border:1px solid var(--line,#d6deee);background:#fff;'+
+      'border-radius:999px;padding:5px 6px 5px 12px;}';
+    document.head.appendChild(st);
+  }
+
+  var active=null;
+  function say(text, btn){
+    try{speechSynthesis.cancel();}catch(e){}
+    if(active) active.setAttribute('aria-pressed','false');
+    if(active===btn){ active=null; return; }        // tap the same one again = stop
+    var u=new SpeechSynthesisUtterance(String(text).replace(/[\u2019]/g,"'")); u.rate=0.95;
+    u.onend  =function(){ if(active===btn){btn.setAttribute('aria-pressed','false'); active=null;} };
+    u.onerror=function(){ if(active===btn){btn.setAttribute('aria-pressed','false'); active=null;} };
+    btn.setAttribute('aria-pressed','true'); active=btn;
+    speechSynthesis.speak(u);
+  }
+  function sayBtn(text){
+    var b=document.createElement('button');
+    b.type='button'; b.className='ra-say'; b.setAttribute('aria-pressed','false');
+    b.setAttribute('aria-label','Read aloud: '+text); b.textContent='🔊';
+    b.addEventListener('click', function(e){ e.stopPropagation(); e.preventDefault(); say(text,b); });
+    b.addEventListener('mousedown',  function(e){ e.stopPropagation(); });
+    b.addEventListener('pointerdown',function(e){ e.stopPropagation(); });
+    return b;
+  }
+  function labelOf(el){
+    var c=el.cloneNode(true);
+    c.querySelectorAll('.ra-say').forEach(function(n){n.remove();});
+    return (c.textContent||'').replace(/\s+/g,' ').trim();
+  }
+
+  function tagItems(){
+    document.querySelectorAll('.sort-card').forEach(function(card){
+      if(card.querySelector(':scope > .ra-say')) return;
+      card.appendChild(sayBtn(labelOf(card)));
+    });
+    document.querySelectorAll('.item .q').forEach(function(q){
+      if(q.querySelector('.ra-say')) return;
+      q.appendChild(sayBtn(labelOf(q)));
+    });
+    document.querySelectorAll('.bucket-head').forEach(function(head){
+      if(head.querySelector('.ra-say')) return;
+      head.appendChild(sayBtn(labelOf(head)));
+    });
+  }
+
+  function buildCatStrip(){
+    if(!hasClassify) return;                          // buckets already show categories with their own speaker
+    if(document.querySelector('.ra-catstrip')) return;
+    var names=[], seen={};
+    document.querySelectorAll('.opt').forEach(function(o){
+      var n=(o.dataset.cat || o.textContent || '').trim();
+      if(n && !seen[n]){ seen[n]=1; names.push(n); }
+    });
+    if(!names.length) return;
+    var strip=document.createElement('div'); strip.className='ra-catstrip';
+    var lab=document.createElement('span'); lab.className='ra-lab'; lab.textContent='Hear the categories:'; strip.appendChild(lab);
+    names.forEach(function(n){
+      var chip=document.createElement('span'); chip.className='ra-cat';
+      chip.appendChild(document.createTextNode(n));
+      chip.appendChild(sayBtn(n));
+      strip.appendChild(chip);
+    });
+    var anchor = root.querySelector('.readrow') || root.querySelector('.intro,.lead,.sub') || root.querySelector('h1');
+    if(anchor) anchor.parentNode.insertBefore(strip, anchor.nextSibling);
+  }
+
+  var mo;
+  function retag(){ if(mo) mo.disconnect(); tagItems(); if(mo) mo.observe(root,{childList:true,subtree:true}); }
+  buildCatStrip();
+  tagItems();
+  mo=new MutationObserver(retag);
+  mo.observe(root,{childList:true,subtree:true});
+
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden){ try{speechSynthesis.cancel();}catch(e){} if(active){active.setAttribute('aria-pressed','false'); active=null;} }
+  });
+  window.addEventListener('pagehide', function(){ try{speechSynthesis.cancel();}catch(e){} });
+})();
+</script>
+</body>
+</html>

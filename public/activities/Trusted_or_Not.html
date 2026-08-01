@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trusted or Not — Year 8 Health</title>
+<style>
+  :root{
+    --navy:#2e2f5b; --blue:#91adda; --paper:#eef2f9; --card:#ffffff;
+    --ink:#2e2f5b; --muted:#5b5d86; --line:#d6deee;
+    --ok:#1f7a52; --ok-bg:#e2f3ea; --bad:#a3243c; --bad-bg:#f7dde2;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--paper); color:var(--ink);
+    font-family:'Helvetica Neue',Arial,sans-serif; padding:24px 16px 60px; line-height:1.5;}
+  .wrap{max-width:720px; margin:0 auto;}
+  .eyebrow{font-size:11px; letter-spacing:.16em; text-transform:uppercase; font-weight:700; color:var(--navy);}
+  h1{font-family:Georgia,serif; font-size:26px; margin:4px 0 6px;}
+  h1 .hl{background:var(--blue); color:var(--navy); padding:0 .12em; border-radius:6px;}
+  .intro{font-size:14.5px; color:var(--muted); margin:0 0 16px; max-width:62ch;}
+  .defs{display:grid; gap:10px; margin-bottom:18px; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));}
+  .def{background:#fff; border:1px solid var(--line); border-left:4px solid var(--blue); border-radius:8px; padding:10px 13px; font-size:12.5px; color:var(--muted);}
+  .def b{color:var(--navy); display:block; margin-bottom:2px; font-size:13.5px;}
+  .bar{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px;}
+  .count{font-size:12.5px; font-weight:700; color:var(--navy); background:#fff; border:1px solid var(--line); padding:6px 12px; border-radius:999px;}
+  .btn{border:1.5px solid var(--line); background:#fff; color:var(--navy); font-weight:700; font-size:13px; padding:8px 14px; border-radius:999px; cursor:pointer; font-family:inherit;}
+  .btn:hover{background:#f2f6fc;} .btn:focus-visible{outline:3px solid var(--navy); outline-offset:2px;}
+  .item{background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:15px 16px; margin-bottom:12px;}
+  .item .q{font-size:15px; margin:0 0 12px;}
+  .opts{display:flex; gap:9px; flex-wrap:wrap;}
+  .opt{border:1.5px solid var(--line); background:#fff; color:var(--navy); font-weight:700; font-size:13.5px;
+    padding:9px 15px; border-radius:10px; cursor:pointer; font-family:inherit;}
+  .opt:hover{border-color:var(--navy); background:#f2f6fc;}
+  .opt:focus-visible{outline:3px solid var(--navy); outline-offset:2px;}
+  .item.done .opt{cursor:default;} .item.done .opt:hover{background:#fff;}
+  .opt.correct{background:var(--ok-bg); border-color:var(--ok); color:var(--ok);}
+  .opt.incorrect{background:var(--bad-bg); border-color:var(--bad); color:var(--bad);}
+  .fb{margin-top:11px; font-size:13.5px; padding:9px 12px; border-radius:8px; display:none;}
+  .item.done .fb{display:block;}
+  .fb.right{background:var(--ok-bg); color:var(--ok);} .fb.wrong{background:var(--bad-bg); color:var(--bad);}
+  @media print{.bar{display:none;} .item{border:1px solid #999;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Year 8 Health · Lesson 11</div>
+  <h1>Trusted or <span class="hl">Not?</span></h1>
+  <p class="intro">Not every website is a good source of health information. Decide whether each source is credible or unreliable.</p>
+  <div class="defs"><div class="def"><b>Credible</b>By health professionals or trusted organisations, current, evidence-based, not selling anything.</div><div class="def"><b>Unreliable</b>Anonymous, out of date, selling a product, or opinion with no evidence.</div></div>
+  <div class="bar">
+    <span class="count" id="count">Correct: 0 / 10</span>
+    <button class="btn" id="reset">Reset</button>
+    <button class="btn" id="reveal">Show answers</button>
+  </div>
+  <div id="list"></div>
+</div>
+<script>
+const ITEMS = [{"q": "A government health site ending in .gov.au", "a": "Credible", "why": "government health sites are trusted and evidence-based."}, {"q": "The Alcohol and Drug Foundation (ADF) website", "a": "Credible", "why": "a recognised, expert health organisation."}, {"q": "An article written by a doctor and reviewed this year", "a": "Credible", "why": "written by an expert and kept current."}, {"q": "A page that lists its sources and research", "a": "Credible", "why": "showing its evidence is a sign of a reliable source."}, {"q": "Health Direct, run by the government", "a": "Credible", "why": "a trusted government health service."}, {"q": "A forum post with no author or date", "a": "Unreliable", "why": "no author or date means you can't check it."}, {"q": "A site trying to sell you a 'detox' product", "a": "Unreliable", "why": "it's biased — it wants your money."}, {"q": "A social media video with no sources", "a": "Unreliable", "why": "there's no evidence to back it up."}, {"q": "A blog last updated in 2009", "a": "Unreliable", "why": "health information can go out of date."}, {"q": "A meme a friend shared", "a": "Unreliable", "why": "memes aren't checked for accuracy."}];
+const CATS = ["Credible", "Unreliable"];
+const TOTAL = ITEMS.length;
+let correct=0, answered=0;
+const list=document.getElementById('list'), countEl=document.getElementById('count');
+function build(){
+  correct=0; answered=0; countEl.textContent=`Correct: 0 / ${TOTAL}`; list.innerHTML='';
+  ITEMS.forEach((it,idx)=>{
+    const card=document.createElement('div'); card.className='item'; card.dataset.idx=idx;
+    const opts=CATS.map(c=>`<button class="opt" data-cat="${c}">${c}</button>`).join('');
+    card.innerHTML=`<p class="q">${it.q}</p><div class="opts">${opts}</div><div class="fb"></div>`;
+    card.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>choose(card,it,b)));
+    list.appendChild(card);
+  });
+}
+function choose(card,it,btn){
+  if(card.classList.contains('done'))return;
+  card.classList.add('done'); answered++;
+  const right=btn.dataset.cat===it.a; const fb=card.querySelector('.fb');
+  if(right){ btn.classList.add('correct'); correct++; fb.className='fb right'; fb.textContent='✓ '+it.why; }
+  else{ btn.classList.add('incorrect'); fb.className='fb wrong'; fb.textContent='✗ Not quite — '+it.why;
+    card.querySelectorAll('.opt').forEach(o=>{if(o.dataset.cat===it.a)o.classList.add('correct');}); }
+  countEl.textContent=`Correct: ${correct} / ${TOTAL}`;
+}
+function reveal(){
+  list.querySelectorAll('.item').forEach(card=>{
+    if(card.classList.contains('done'))return;
+    const it=ITEMS[+card.dataset.idx]; card.classList.add('done');
+    card.querySelectorAll('.opt').forEach(o=>{if(o.dataset.cat===it.a)o.classList.add('correct');});
+    const fb=card.querySelector('.fb'); fb.className='fb right'; fb.textContent='✓ '+it.why;
+  });
+}
+document.getElementById('reset').addEventListener('click',build);
+document.getElementById('reveal').addEventListener('click',reveal);
+build();
+</script>
+
+<!-- Read aloud (accessibility support; self-contained, no libraries, no data collected) -->
+<script>
+(function(){
+  if(!('speechSynthesis' in window)) return;            // unsupported: add nothing
+  var wrap = document.querySelector('.wrap') || document.body;
+  var h1 = wrap.querySelector('h1');
+  if(!h1) return;
+
+  // Button styling (uses the page's palette tokens, with safe fallbacks)
+  if(!document.querySelector('style[data-readaloud]')){
+    var st = document.createElement('style');
+    st.setAttribute('data-readaloud','');
+    st.textContent =
+      '.readrow{margin:10px 0 16px;}'+
+      '.ra-btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line,#d6deee);'+
+      'background:#fff;color:var(--navy,#2e2f5b);font-family:inherit;font-size:13px;font-weight:600;'+
+      'padding:8px 14px;border-radius:999px;cursor:pointer;}'+
+      '.ra-btn:hover{background:#f2f6fc;}'+
+      '.ra-btn:focus-visible{outline:3px solid var(--navy,#2e2f5b);outline-offset:2px;}'+
+      '.ra-btn[aria-pressed="true"]{background:var(--navy,#2e2f5b);color:#fff;border-color:var(--navy,#2e2f5b);}';
+    document.head.appendChild(st);
+  }
+
+  // Build the button and place it after the intro (or the heading if there is none)
+  var row = document.createElement('div'); row.className='readrow';
+  var btn = document.createElement('button');
+  btn.type='button'; btn.className='ra-btn'; btn.setAttribute('aria-pressed','false');
+  btn.setAttribute('aria-label','Read this activity aloud');
+  btn.textContent='🔊 Read aloud';
+  row.appendChild(btn);
+  var anchor = wrap.querySelector('.intro, .lead, .sub') || h1;
+  anchor.parentNode.insertBefore(row, anchor.nextSibling);
+
+  // Collect the visible, readable text from the live page (skips controls + chrome + hidden bits)
+  var SKIP='button,.btn,.opt,.iconbtn,.ra-btn,select,option,input,textarea,.eyebrow,.prog,.progress,.count,.score,footer,.readrow';
+  function readable(){
+    var parts=[], walker=document.createTreeWalker(wrap, NodeFilter.SHOW_TEXT, {
+      acceptNode:function(n){
+        if(!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        var p=n.parentElement; if(!p) return NodeFilter.FILTER_REJECT;
+        if(p.closest(SKIP)) return NodeFilter.FILTER_REJECT;
+        var s=window.getComputedStyle(p);
+        if(s.display==='none'||s.visibility==='hidden'||parseFloat(s.opacity)===0) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    var n; while(n=walker.nextNode()){ parts.push(n.nodeValue.trim()); }
+    return parts.join(' ').replace(/\s+/g,' ').replace(/[\u2019]/g,"'").trim();
+  }
+
+  var speaking=false;
+  function stop(){ try{speechSynthesis.cancel();}catch(e){} speaking=false; btn.setAttribute('aria-pressed','false'); }
+  function start(){
+    stop();
+    var text=readable(); if(!text) return;
+    var u=new SpeechSynthesisUtterance(text); u.rate=0.95;
+    u.onend=function(){ speaking=false; btn.setAttribute('aria-pressed','false'); };
+    u.onerror=function(){ speaking=false; btn.setAttribute('aria-pressed','false'); };
+    speechSynthesis.speak(u); speaking=true; btn.setAttribute('aria-pressed','true');
+  }
+  btn.addEventListener('click', function(){ speaking?stop():start(); });
+  document.addEventListener('visibilitychange', function(){ if(document.hidden) stop(); });
+  window.addEventListener('pagehide', stop);
+})();
+</script>
+
+<!-- Per-label read aloud for sorters/classify activities (self-contained, no libraries, no data collected) -->
+<script>
+(function(){
+  if(!('speechSynthesis' in window)) return;
+  var root = document.querySelector('.wrap') || document.body;
+
+  var hasBuckets  = document.querySelector('.sort-card') || document.querySelector('.bucket-head');
+  var hasClassify = document.querySelector('.item .q');
+  if(!hasBuckets && !hasClassify) return;   // not a sorter/classify page: add nothing
+
+  if(!document.querySelector('style[data-readsay]')){
+    var st=document.createElement('style'); st.setAttribute('data-readsay','');
+    st.textContent =
+      '.ra-say{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;'+
+      'width:26px;height:26px;margin-left:6px;padding:0;border-radius:999px;cursor:pointer;'+
+      'border:1px solid var(--line,#d6deee);background:#fff;color:var(--navy,#2e2f5b);'+
+      'font-size:13px;line-height:1;vertical-align:middle;}'+
+      '.ra-say:hover{background:#f2f6fc;}'+
+      '.ra-say:focus-visible{outline:3px solid var(--navy,#2e2f5b);outline-offset:2px;}'+
+      '.ra-say[aria-pressed="true"]{background:var(--navy,#2e2f5b);color:#fff;border-color:var(--navy,#2e2f5b);}'+
+      '.bucket-head .ra-say{background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.55);color:#fff;}'+
+      '.bucket-head .ra-say:hover{background:rgba(255,255,255,.4);}'+
+      '.bucket-head .ra-say[aria-pressed="true"]{background:#fff;color:var(--navy,#2e2f5b);}'+
+      '.ra-catstrip{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px;}'+
+      '.ra-catstrip .ra-lab{font-size:13px;font-weight:600;color:var(--muted,#5b5d86);}'+
+      '.ra-cat{display:inline-flex;align-items:center;font-size:13px;font-weight:600;'+
+      'color:var(--navy,#2e2f5b);border:1px solid var(--line,#d6deee);background:#fff;'+
+      'border-radius:999px;padding:5px 6px 5px 12px;}';
+    document.head.appendChild(st);
+  }
+
+  var active=null;
+  function say(text, btn){
+    try{speechSynthesis.cancel();}catch(e){}
+    if(active) active.setAttribute('aria-pressed','false');
+    if(active===btn){ active=null; return; }        // tap the same one again = stop
+    var u=new SpeechSynthesisUtterance(String(text).replace(/[\u2019]/g,"'")); u.rate=0.95;
+    u.onend  =function(){ if(active===btn){btn.setAttribute('aria-pressed','false'); active=null;} };
+    u.onerror=function(){ if(active===btn){btn.setAttribute('aria-pressed','false'); active=null;} };
+    btn.setAttribute('aria-pressed','true'); active=btn;
+    speechSynthesis.speak(u);
+  }
+  function sayBtn(text){
+    var b=document.createElement('button');
+    b.type='button'; b.className='ra-say'; b.setAttribute('aria-pressed','false');
+    b.setAttribute('aria-label','Read aloud: '+text); b.textContent='🔊';
+    b.addEventListener('click', function(e){ e.stopPropagation(); e.preventDefault(); say(text,b); });
+    b.addEventListener('mousedown',  function(e){ e.stopPropagation(); });
+    b.addEventListener('pointerdown',function(e){ e.stopPropagation(); });
+    return b;
+  }
+  function labelOf(el){
+    var c=el.cloneNode(true);
+    c.querySelectorAll('.ra-say').forEach(function(n){n.remove();});
+    return (c.textContent||'').replace(/\s+/g,' ').trim();
+  }
+
+  function tagItems(){
+    document.querySelectorAll('.sort-card').forEach(function(card){
+      if(card.querySelector(':scope > .ra-say')) return;
+      card.appendChild(sayBtn(labelOf(card)));
+    });
+    document.querySelectorAll('.item .q').forEach(function(q){
+      if(q.querySelector('.ra-say')) return;
+      q.appendChild(sayBtn(labelOf(q)));
+    });
+    document.querySelectorAll('.bucket-head').forEach(function(head){
+      if(head.querySelector('.ra-say')) return;
+      head.appendChild(sayBtn(labelOf(head)));
+    });
+  }
+
+  function buildCatStrip(){
+    if(!hasClassify) return;                          // buckets already show categories with their own speaker
+    if(document.querySelector('.ra-catstrip')) return;
+    var names=[], seen={};
+    document.querySelectorAll('.opt').forEach(function(o){
+      var n=(o.dataset.cat || o.textContent || '').trim();
+      if(n && !seen[n]){ seen[n]=1; names.push(n); }
+    });
+    if(!names.length) return;
+    var strip=document.createElement('div'); strip.className='ra-catstrip';
+    var lab=document.createElement('span'); lab.className='ra-lab'; lab.textContent='Hear the categories:'; strip.appendChild(lab);
+    names.forEach(function(n){
+      var chip=document.createElement('span'); chip.className='ra-cat';
+      chip.appendChild(document.createTextNode(n));
+      chip.appendChild(sayBtn(n));
+      strip.appendChild(chip);
+    });
+    var anchor = root.querySelector('.readrow') || root.querySelector('.intro,.lead,.sub') || root.querySelector('h1');
+    if(anchor) anchor.parentNode.insertBefore(strip, anchor.nextSibling);
+  }
+
+  var mo;
+  function retag(){ if(mo) mo.disconnect(); tagItems(); if(mo) mo.observe(root,{childList:true,subtree:true}); }
+  buildCatStrip();
+  tagItems();
+  mo=new MutationObserver(retag);
+  mo.observe(root,{childList:true,subtree:true});
+
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden){ try{speechSynthesis.cancel();}catch(e){} if(active){active.setAttribute('aria-pressed','false'); active=null;} }
+  });
+  window.addEventListener('pagehide', function(){ try{speechSynthesis.cancel();}catch(e){} });
+})();
+</script>
+
+<!-- Printable worksheet / Save as PDF (self-contained, no libraries) -->
+<script>
+(function(){
+if(typeof window==='undefined')return;
+function buildBody(){
+  var cats=(typeof CATS!=='undefined')?CATS:[]; var items=(typeof ITEMS!=='undefined')?ITEMS:[];
+  var optHTML=cats.map(function(c){return '<span class="opt-box"><span class="box"></span>'+esc(c)+'</span>';}).join('');
+  var list=items.map(function(it){return '<li>'+esc(it.q)+'<div class="ws-opts">'+optHTML+'</div></li>';}).join('');
+  var rows=items.map(function(it,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(it.q)+'</td><td><b>'+esc(it.a)+'</b></td></tr>';}).join('');
+  var akey='<div class="ra-akey"><h3>Answer key</h3><table><tr><th>#</th><th>Statement</th><th>Answer</th></tr>'+rows+'</table></div>';
+  return '<p class="ws-intro"><b>Circle the correct category for each one.</b></p><ol class="ws-list">'+list+'</ol>'+akey;
+}
+var esc=function(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
+(function(){
+  if(document.querySelector('style[data-print]')) return;
+  var s=document.createElement('style'); s.setAttribute('data-print','');
+  s.textContent=
+  '.ra-print{display:none;}'+
+  '.ra-print-btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line,#d6deee);background:#fff;color:var(--navy,#2e2f5b);font-family:inherit;font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;cursor:pointer;margin-left:6px;}'+
+  '.ra-print-btn:hover{background:#f2f6fc;}'+
+  '.ra-print-btn:focus-visible{outline:3px solid var(--navy,#2e2f5b);outline-offset:2px;}'+
+  '@media print{'+
+    '@page{margin:14mm;}'+
+    'html,body{background:#fff !important;}'+
+    'body>*:not(.ra-print){display:none !important;}'+
+    '.ra-print{display:block !important;color:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact;font:12pt/1.45 Georgia,"Times New Roman",serif;}'+
+    '.ra-print .ws-title{font-size:19pt;margin:0 0 3mm;}'+
+    '.ra-print .ws-meta{font-size:10.5pt;margin:0 0 4mm;border-bottom:1px solid #000;padding-bottom:2.5mm;}'+
+    '.ra-print .ws-intro{font-size:11pt;margin:0 0 4mm;}'+
+    '.ra-print ol.ws-list{margin:0;padding-left:7mm;}'+
+    '.ra-print ol.ws-list>li{margin:0 0 5mm;page-break-inside:avoid;break-inside:avoid;}'+
+    '.ra-print .ws-opts{margin-top:1.5mm;}'+
+    '.ra-print .opt-box{display:inline-block;margin:0 8mm 1mm 0;font-size:11pt;}'+
+    '.ra-print .box{display:inline-block;width:4mm;height:4mm;border:1.4px solid #000;margin-right:2mm;vertical-align:-1px;border-radius:50%;}'+
+    '.ra-print .box.sq{border-radius:1px;}'+
+    '.ra-print .opt-line{margin:1.5mm 0;}'+
+    '.ra-print .fact{font-style:italic;margin:1mm 0 1.5mm;}'+
+    '.ra-print .src{font-size:10.5pt;}'+
+    '.ra-print .ws-line{border-bottom:1px solid #000;height:8mm;margin:0 0 1mm;}'+
+    '.ra-print .msgbox,.ra-print .wordbank{border:1px solid #000;padding:3mm;margin:0 0 4mm;font-size:11pt;page-break-inside:avoid;break-inside:avoid;}'+
+    '.ra-print .wordbank ul{margin:1mm 0 2mm;padding-left:6mm;}'+
+    '.ra-print .ws-graph{margin:0 0 4mm;page-break-inside:avoid;break-inside:avoid;}'+
+    '.ra-print .ws-graph svg{max-width:150mm;height:auto;}'+
+    '.ra-print .matchwrap{display:flex;gap:8mm;}'+
+    '.ra-print .matchwrap .mcol{flex:1;}'+
+    '.ra-print .matchwrap ol{padding-left:7mm;}'+
+    '.ra-print .matchwrap li{margin:0 0 3mm;page-break-inside:avoid;}'+
+    '.ra-print .sc-title{margin:0 0 1mm;}'+
+    '.ra-print .sc-text{margin:0 0 1.5mm;}'+
+    '.ra-print .ra-akey{page-break-before:always;break-before:page;}'+
+    '.ra-print .ra-akey h3{font-size:14pt;border-top:2px solid #000;padding-top:3mm;margin:0 0 3mm;}'+
+    '.ra-print .ra-akey table{border-collapse:collapse;width:100%;font-size:10.5pt;}'+
+    '.ra-print .ra-akey td,.ra-print .ra-akey th{border:1px solid #000;padding:2mm 3mm;text-align:left;vertical-align:top;}'+
+    '.ra-print .ra-akey ul{margin:0;padding-left:6mm;}'+
+  '}';
+  document.head.appendChild(s);
+})();
+var host=document.querySelector('.readrow')||document.querySelector('.bar')||document.querySelector('.toolbar')||document.querySelector('.controls');
+if(!host){host=document.createElement('div');host.className='readrow';var a=document.querySelector('.intro,.lead,h1');if(a&&a.parentNode){a.parentNode.insertBefore(host,a.nextSibling);}else{document.body.appendChild(host);}}
+var btn=document.createElement('button');btn.type='button';btn.className='ra-print-btn';btn.textContent='\uD83D\uDDA8\uFE0F Print / Save PDF';host.appendChild(btn);
+var sheet=document.createElement('div');sheet.className='ra-print';document.body.appendChild(sheet);
+var title=((document.querySelector('h1')||{}).textContent||'Worksheet').trim();
+var introRaw=((document.querySelector('.intro,.lead')||{}).textContent||'').trim();
+var intro=(/\b(tap|click|drag|drop|turns? green|lock in)\b/i.test(introRaw))?'':introRaw;
+function wordCheck(){var el=document.querySelector('.defs');if(!el)return '';var defs=el.querySelectorAll('.def');if(defs.length){var items=Array.prototype.map.call(defs,function(dd){var b=dd.querySelector('b');var term=b?b.textContent.trim():'';var rest=(dd.textContent||'').trim();if(term&&rest.indexOf(term)===0)rest=rest.slice(term.length).trim();return '<li><b>'+esc(term)+'</b> \u2014 '+esc(rest)+'</li>';}).join('');return '<div class="wordbank"><b>Word check</b><ul>'+items+'</ul></div>';}return '<div class="wordbank"><b>Word check</b><div>'+esc(el.textContent.trim())+'</div></div>';}
+function render(body){sheet.innerHTML='<h2 class="ws-title">'+esc(title)+'</h2>'+'<div class="ws-meta">Name: _____________________________    Class: ____________    Date: ____________</div>'+(intro?'<p class="ws-intro">'+esc(intro)+'</p>':'')+wordCheck()+body;}
+btn.addEventListener('click',function(){try{render(buildBody());}catch(e){render('<p>Could not build the worksheet.</p>');}window.print();});
+})();
+</script>
+</body>
+</html>

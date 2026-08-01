@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Party Night: Choose Your Path — Year 8 Health</title>
+<style>
+  :root{
+    --navy:#2e2f5b; --blue:#91adda; --paper:#eef2f9; --card:#ffffff;
+    --ink:#2e2f5b; --muted:#5b5d86; --line:#d6deee;
+    /* severity (functional — encodes how the night ended) */
+    --safe:#1f7a52;    --safe-bg:#e2f3ea;
+    --mild:#2e6db4;    --mild-bg:#e2edf8;
+    --rough:#c1521a;   --rough-bg:#fbe9dc;
+    --serious:#a3243c; --serious-bg:#f7dde2;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    padding:26px 18px 60px; line-height:1.55;
+  }
+  .wrap{max-width:640px; margin:0 auto;}
+
+  /* top bar */
+  .topbar{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:18px;}
+  .brand{font-size:11px; letter-spacing:.16em; text-transform:uppercase; font-weight:700; color:var(--navy);}
+  .spacer{flex:1;}
+  .counter{font-size:12px; font-weight:700; color:var(--navy); background:#fff; border:1px solid var(--line);
+    padding:5px 11px; border-radius:999px;}
+  .iconbtn{border:1px solid var(--line); background:#fff; color:var(--navy); font-size:12.5px; font-weight:600;
+    padding:6px 12px; border-radius:999px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;}
+  .iconbtn:hover{background:#f2f6fc;}
+  .iconbtn:focus-visible{outline:3px solid var(--navy); outline-offset:2px;}
+  .iconbtn[aria-pressed="true"]{background:var(--navy); color:#fff; border-color:var(--navy);}
+
+  /* card */
+  .stage{background:var(--card); border:1px solid var(--line); border-radius:16px;
+    box-shadow:0 10px 30px -20px rgba(46,47,91,.5); padding:26px 24px 24px; position:relative; overflow:hidden;}
+  .stage::before{content:""; position:absolute; left:0; top:0; bottom:0; width:6px; background:var(--blue);}
+  .scene{font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:var(--blue);
+    margin-bottom:10px;}
+  .passage{font-family:Georgia,'Iowan Old Style',serif; font-size:18px; line-height:1.6; color:var(--ink); margin:0;}
+  .passage + .passage{margin-top:12px;}
+
+  /* word-check aside */
+  .wordcheck{margin-top:16px; background:#f2f6fc; border:1px solid var(--line); border-left:4px solid var(--blue);
+    border-radius:8px; padding:10px 13px; font-size:13.5px; color:var(--muted);}
+  .wordcheck b{color:var(--navy);}
+
+  /* choices */
+  .choices{margin-top:22px; display:flex; flex-direction:column; gap:10px;}
+  .choice{width:100%; text-align:left; background:#fff; border:1.5px solid var(--line); border-radius:12px;
+    padding:14px 16px; font-size:15px; font-weight:600; color:var(--ink); cursor:pointer;
+    display:flex; align-items:center; gap:12px; transition:border-color .12s, background .12s, transform .08s;
+    font-family:inherit;}
+  .choice::before{content:"›"; color:var(--blue); font-size:22px; font-weight:800; line-height:1; flex:none;}
+  .choice:hover{border-color:var(--navy); background:#f6f9fd;}
+  .choice:active{transform:scale(.99);}
+  .choice:focus-visible{outline:3px solid var(--navy); outline-offset:2px;}
+
+  /* ending */
+  .badge{display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:800; letter-spacing:.03em;
+    text-transform:uppercase; padding:6px 13px; border-radius:999px; margin-bottom:14px;}
+  .badge.safe{background:var(--safe-bg); color:var(--safe);}
+  .badge.mild{background:var(--mild-bg); color:var(--mild);}
+  .badge.rough{background:var(--rough-bg); color:var(--rough);}
+  .badge.serious{background:var(--serious-bg); color:var(--serious);}
+  .stage.safe::before{background:var(--safe);}
+  .stage.mild::before{background:var(--mild);}
+  .stage.rough::before{background:var(--rough);}
+  .stage.serious::before{background:var(--serious);}
+  .ending-title{font-family:Georgia,serif; font-size:24px; font-weight:700; margin:0 0 12px;}
+  .reflection{margin-top:20px; background:#f2f6fc; border:1px solid var(--line); border-radius:10px; padding:15px 16px;}
+  .reflection .rlabel{font-size:11px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--blue); margin-bottom:6px;}
+  .reflection p{margin:0; font-size:14.5px; color:var(--muted); line-height:1.55;}
+
+  /* nav */
+  .nav{display:flex; gap:10px; margin-top:22px; flex-wrap:wrap;}
+  .btn{border:0; border-radius:11px; padding:12px 18px; font-size:14.5px; font-weight:700; cursor:pointer;
+    font-family:inherit; display:inline-flex; align-items:center; gap:8px; transition:background .14s, transform .08s;}
+  .btn:active{transform:scale(.98);}
+  .btn:focus-visible{outline:3px solid var(--navy); outline-offset:2px;}
+  .btn-primary{background:var(--navy); color:#fff;}
+  .btn-primary:hover{background:#3d3e78;}
+  .btn-ghost{background:#fff; color:var(--navy); border:1.5px solid var(--line);}
+  .btn-ghost:hover{background:#f2f6fc;}
+  .btn-ghost:disabled{opacity:.4; cursor:not-allowed;}
+
+  /* intro */
+  .intro .passage{font-size:17px;}
+  .setup{font-family:'Helvetica Neue',Arial,sans-serif; font-size:14px; color:var(--muted); margin-top:14px;}
+  h1.title{font-family:Georgia,serif; font-size:30px; line-height:1.1; margin:2px 0 4px;}
+  .title .hl{background:var(--blue); color:var(--navy); padding:0 .1em; border-radius:6px;}
+
+  footer.note{text-align:center; font-size:11.5px; color:#9aa4cd; margin-top:26px;}
+
+  @media (prefers-reduced-motion:no-preference){
+    .fade{animation:fade .3s ease;}
+    @keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <span class="brand">Year 8 Health — Choose Your Path</span>
+    <span class="spacer"></span>
+    <button class="iconbtn" id="readBtn" aria-pressed="false" title="Read the text out loud">🔊 Read aloud</button>
+    <span class="counter" id="counter">Endings found: 0 / 6</span>
+  </div>
+
+  <div class="stage fade" id="stage" aria-live="polite"></div>
+
+  <div class="nav">
+    <button class="btn btn-ghost" id="backBtn" disabled>← Back one step</button>
+    <button class="btn btn-ghost" id="restartBtn">↺ Start over</button>
+  </div>
+
+  <footer class="note">A practice story for making safe choices. The characters are fictional — nobody really gets hurt here.</footer>
+</div>
+
+<script>
+// ── Story data ─────────────────────────────────────────────────────────
+// Each node: scene, text[], optional define{term,meaning}, and either
+// choices[{label,to}] OR ending{title,severity,reflection}.
+const STORY = {
+  intro:{
+    intro:true,
+    scene:"Before you start",
+    title:true,
+    text:[
+      "It's Friday night at Sam's house party. There's music, a crowd — and some choices coming your way about drinks and vaping.",
+      "Every choice you make changes what happens next. Some paths lead you home safe. Others… don't go so well."
+    ],
+    setup:"There are 6 different endings. See if you can find the safe one — then go back and explore what the other choices lead to.",
+    choices:[{label:"Walk into the party", to:"start"}]
+  },
+
+  start:{
+    scene:"Arriving",
+    text:["The music is loud and there are more people than you expected. Your mate Jordan waves you over. By the kitchen you spot cans of alcohol on the bench and someone passing around a vape. Across the room, the person you like catches your eye and smiles."],
+    choices:[
+      {label:"Go and stand with Jordan.", to:"jordan"},
+      {label:"Head to the kitchen to see what's going on.", to:"kitchen"}
+    ]
+  },
+
+  jordan:{
+    scene:"With Jordan",
+    text:["“Glad you came!” Jordan says. “Heads up — some of the older kids brought drinks. You don't have to.” Just then someone presses a can into your hand. “Here! Loosen up.”"],
+    choices:[
+      {label:"“No thanks, I'm good with water.”", to:"refuse_good"},
+      {label:"Take the can so you don't seem rude — but don't drink it.", to:"hold_can"},
+      {label:"“Umm… okay, just one.”", to:"one_drink"}
+    ]
+  },
+
+  kitchen:{
+    scene:"The Kitchen",
+    text:["A group is daring each other to try the vape. “New kid — your turn!” one of them laughs. The person you like is watching."],
+    choices:[
+      {label:"“Nah, not my thing.” Head back to the lounge.", to:"refuse_good"},
+      {label:"Joke — “I'm allergic to looking cool” — and step away.", to:"refuse_good"},
+      {label:"Try it once so you don't look scared.", to:"vape_try"}
+    ]
+  },
+
+  vape_try:{
+    scene:"The Kitchen",
+    text:["You take a puff and cough — really hard. Your eyes stream and you can't stop. The group laughs, and so does the person you like. Your face burns."],
+    choices:[
+      {label:"Laugh it off, wave it away, and go get some water.", to:"recover"},
+      {label:"Grab a drink and try to look smooth to win them back.", to:"crush_fail"}
+    ]
+  },
+
+  refuse_good:{
+    scene:"The Lounge",
+    text:["You hand it back: “I'm good, thanks.” Jordan shrugs — “Fair enough” — and grabs you a glass of water. A minute later, the person who offered has already forgotten about it. Saying no was easier than you thought."],
+    choices:[
+      {label:"Hang out with Jordan and keep an eye on the time.", to:"good_mid"},
+      {label:"Text a parent/carer now to agree on a pick-up time.", to:"exit_plan"}
+    ]
+  },
+
+  hold_can:{
+    scene:"With Jordan",
+    text:["You take the can just to end the awkwardness — now you're stuck holding it. Someone spots you and starts a chant: “Drink! Drink! Drink!” A few people turn to watch."],
+    choices:[
+      {label:"Put it down: “I'll pass, actually.”", to:"refuse_good"},
+      {label:"Take a sip so they'll stop staring.", to:"one_drink"},
+      {label:"Slip away to the bathroom to get out of the spotlight.", to:"bathroom"}
+    ]
+  },
+
+  bathroom:{
+    scene:"Bathroom Break",
+    text:["You duck into the bathroom and breathe. Away from the noise, you can think clearly. Your phone buzzes — it's home, checking you're okay."],
+    choices:[
+      {label:"Text back, ask for a pick-up, and wait out front.", to:"exit_plan"},
+      {label:"Go back out and grab a drink to calm your nerves.", to:"one_drink"}
+    ]
+  },
+
+  recover:{
+    scene:"The Lounge",
+    text:["You wave the vape away, laughing, and grab a glass of water. Your throat still tingles, but the moment passes and people move on. That was closer than you'd like."],
+    choices:[
+      {label:"Stick with Jordan and watch the time.", to:"good_mid"},
+      {label:"Text a parent/carer to agree on a pick-up time.", to:"exit_plan"}
+    ]
+  },
+
+  good_mid:{
+    scene:"Later",
+    text:["You're having a decent night without drinking. It's getting late, and Jordan mentions a few people are getting really drunk — it's starting to get messy."],
+    choices:[
+      {label:"Call for a lift and head home now, as planned.", to:"exit_plan"},
+      {label:"Stay longer — it's just getting fun.", to:"late_party"},
+      {label:"Have one drink now — you've 'earned it', right?", to:"one_drink"}
+    ]
+  },
+
+  late_party:{
+    scene:"Getting Messy",
+    text:["You stay on. The party's louder now, and a few people are stumbling. Someone suggests heading to the park down the road to keep things going."],
+    choices:[
+      {label:"Decide it's time to go — call for a lift.", to:"exit_plan"},
+      {label:"Go along to the park with the group.", to:"street"},
+      {label:"Join the people drinking so you're not left out.", to:"one_drink"}
+    ]
+  },
+
+  one_drink:{
+    scene:"One Drink",
+    text:["You drink one to fit in. It burns a bit, but people cheer and for a second it feels good to belong. Ten minutes later, another can appears. “You're keeping up, right?”"],
+    choices:[
+      {label:"“That's me done — I'm on water now.”", to:"recover"},
+      {label:"Keep going. You don't want to be the boring one.", to:"drunk"},
+      {label:"Say you need air and step outside.", to:"street"}
+    ]
+  },
+
+  drunk:{
+    scene:"Spinning",
+    text:["One turns into a few. The room tilts and your stomach lurches. Jordan looks worried. “Hey — you don't look good. Are you okay?”"],
+    choices:[
+      {label:"Tell Jordan you feel sick and need help.", to:"helped"},
+      {label:"Push through — you don't want to make a scene.", to:"collapse"},
+      {label:"Stumble over to say hi to the person you like.", to:"vomit"}
+    ]
+  },
+
+  helped:{
+    scene:"Getting Help",
+    text:["“I feel really sick,” you admit. Jordan helps you sit down, gets you water, and quietly calls your parent/carer to come early. It's not how you pictured the night — but you're being looked after."],
+    choices:[
+      {label:"Wait with Jordan for your lift.", to:"parent"},
+      {label:"Insist you're “totally fine” and wander off alone.", to:"collapse"}
+    ]
+  },
+
+  street:{
+    scene:"Outside",
+    text:["Out on the street the cold air hits and everything feels louder and looser. You're rowdy now — laughing too loud, not really thinking. You knock over a wheelie bin and shout at a passing car. A police car slows down."],
+    define:{term:"Disorderly conduct", meaning:"being noisy, aggressive, or a nuisance in public in a way that breaks the law."},
+    choices:[
+      {label:"Calm down, apologise, and sit on the kerb.", to:"parent"},
+      {label:"Mouth off at the police and refuse to move.", to:"cell"}
+    ]
+  },
+
+  // ── Endings ──────────────────────────────────────────────────────────
+  exit_plan:{
+    scene:"The End",
+    ending:{title:"Home Safe", severity:"safe",
+      reflection:"This is the goal. Having an exit plan and a trusted adult to call is one of the strongest safety strategies there is. Leaving early isn't 'boring' — it's smart."},
+    text:["You message home, agree on a time, and wait out the front with Jordan until your lift arrives. You leave the party the way you came in — safe, clear-headed, and with a good story for Monday. Nailed it."]
+  },
+
+  crush_fail:{
+    scene:"The End",
+    ending:{title:"Cringe of the Century", severity:"mild",
+      reflection:"Good news: you're safe. Trying to look cool can be its own kind of peer pressure. A calm “no thanks” usually looks more confident than trying too hard."},
+    text:["You grab a drink to seem relaxed and attempt a smooth move to impress them — and trip over the coffee table, tipping a full cup all over their shoes. The whole room laughs. You're totally fine… except you now want the floor to swallow you."]
+  },
+
+  vomit:{
+    scene:"The End",
+    ending:{title:"All Over Your Mates", severity:"rough",
+      reflection:"You're okay, but your friends copped it and feelings are hurt. Drinking fast to keep up is how nights go wrong quickly. Stopping at 'no' — or switching to water early — keeps you and the people around you comfortable."},
+    text:["You weave across the room toward the person you like. You open your mouth to say something clever… and throw up — all over them and two of your friends. The music suddenly feels very loud. Your friends are not impressed, and neither is Sam's carpet."]
+  },
+
+  parent:{
+    scene:"The End",
+    ending:{title:"Grounded — But Safe", severity:"rough",
+      reflection:"Being grounded feels bad, but staying safe matters far more than staying out of trouble. Adults are usually more scared than angry. Owning up and asking for help is exactly what stops a small mistake becoming a big one."},
+    text:["Not long after, your parent/carer arrives — worried sick and pretty angry. The ride home is silent, and you're grounded for two weeks. It stings. But you made it home safe, and tonight, that matters more than anything else."]
+  },
+
+  collapse:{
+    scene:"The End",
+    ending:{title:"A Night in Hospital", severity:"serious",
+      reflection:"This is why we never leave someone who's really unwell, and never let 'getting in trouble' stop us calling for help. If a friend can't be woken, is struggling to breathe, or has collapsed, call 000 straight away — it can save a life."},
+    text:["You try to push through, but everything goes grey, then black. You wake in the back of an ambulance with an oxygen mask on and a paramedic saying your name. You're taken to hospital to be watched overnight. You'll be okay — because someone called for help in time."]
+  },
+
+  cell:{
+    scene:"The End",
+    ending:{title:"A Night in the Cell", severity:"serious",
+      reflection:"Alcohol makes people do things they'd never do sober — like mouthing off at police. A criminal matter can follow you for years. The safest move is to never get to this point: have a plan to leave before things get out of hand."},
+    text:["You shove past the officer and yell that they can't tell you what to do. That's it — you're put in the back of the police car and spend the night in a cell to sober up, charged with disorderly conduct. Your parents have to come to the station in the morning. Not your finest night."]
+  }
+};
+
+const TOTAL_ENDINGS = 6;
+
+// ── State ──────────────────────────────────────────────────────────────
+let historyStack = [];
+let current = "intro";
+const found = new Set();
+
+const stage   = document.getElementById('stage');
+const backBtn = document.getElementById('backBtn');
+const restart = document.getElementById('restartBtn');
+const counter = document.getElementById('counter');
+const readBtn = document.getElementById('readBtn');
+
+// ── Render ─────────────────────────────────────────────────────────────
+function render(id, isBack){
+  const node = STORY[id];
+  current = id;
+  stopSpeaking();
+
+  stage.className = 'stage fade' + (node.ending ? ' ' + node.ending.severity : '');
+
+  const parts = [];
+  if(node.intro){
+    parts.push(`<div class="scene">${node.scene}</div>`);
+    parts.push(`<h1 class="title">Party Night: <span class="hl">Choose Your Path</span></h1>`);
+    node.text.forEach(t=>parts.push(`<p class="passage">${t}</p>`));
+    parts.push(`<p class="setup">${node.setup}</p>`);
+  } else if(node.ending){
+    parts.push(`<span class="badge ${node.ending.severity}">${severityLabel(node.ending.severity)}</span>`);
+    parts.push(`<h2 class="ending-title">${node.ending.title}</h2>`);
+    node.text.forEach(t=>parts.push(`<p class="passage">${t}</p>`));
+    parts.push(`<div class="reflection"><div class="rlabel">What could help</div><p>${node.ending.reflection}</p></div>`);
+  } else {
+    if(node.scene) parts.push(`<div class="scene">${node.scene}</div>`);
+    node.text.forEach(t=>parts.push(`<p class="passage">${t}</p>`));
+    if(node.define) parts.push(`<div class="wordcheck"><b>Word check — ${node.define.term}:</b> ${node.define.meaning}</div>`);
+  }
+
+  // choices
+  if(node.choices){
+    const c = node.choices.map((ch,i)=>
+      `<button class="choice" data-to="${ch.to}">${ch.label}</button>`).join('');
+    parts.push(`<div class="choices">${c}</div>`);
+  } else if(node.ending){
+    parts.push(`<div class="choices">
+      <button class="choice" data-to="start" data-reset="1">Play again from the start</button>
+    </div>`);
+  }
+
+  stage.innerHTML = parts.join('');
+
+  // record endings
+  if(node.ending){ found.add(id); counter.textContent = `Endings found: ${found.size} / ${TOTAL_ENDINGS}`; }
+
+  // wire choices
+  stage.querySelectorAll('.choice').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(btn.dataset.reset){ resetGame(); return; }
+      historyStack.push(current);
+      render(btn.dataset.to);
+    });
+  });
+
+  backBtn.disabled = historyStack.length === 0;
+  // focus first heading/passage for screen readers & keyboard users
+  const focusTarget = stage.querySelector('.title, .ending-title, .scene, .passage');
+  if(focusTarget){ focusTarget.setAttribute('tabindex','-1'); focusTarget.focus(); }
+}
+
+function severityLabel(s){
+  return {safe:"✓ Safe outcome", mild:"Mild — a bit embarrassing", rough:"Rough night", serious:"Serious — this is dangerous"}[s];
+}
+
+function resetGame(){ historyStack = []; render('start'); }
+
+backBtn.addEventListener('click', ()=>{
+  if(historyStack.length){ const prev = historyStack.pop(); render(prev, true); }
+});
+restart.addEventListener('click', ()=>{ historyStack = []; render('intro'); });
+
+// ── Read aloud (Web Speech API) ────────────────────────────────────────
+let speaking = false;
+function currentSpeakText(){
+  const node = STORY[current];
+  let t = (node.scene? node.scene+'. ':'') ;
+  if(node.ending) t += node.ending.title + '. ';
+  t += node.text.join(' ');
+  if(node.define) t += ' Word check. ' + node.define.term + '. ' + node.define.meaning;
+  if(node.ending) t += ' What could help. ' + node.ending.reflection;
+  if(node.choices) t += ' Your choices are: ' + node.choices.map((c,i)=>`Option ${i+1}. ${c.label}`).join(' ');
+  return t.replace(/[“”]/g,'"').replace(/[’]/g,"'");
+}
+function speak(){
+  if(!('speechSynthesis' in window)) return;
+  stopSpeaking();
+  const u = new SpeechSynthesisUtterance(currentSpeakText());
+  u.rate = 0.95; u.onend = ()=>{ speaking=false; readBtn.setAttribute('aria-pressed','false'); };
+  speechSynthesis.speak(u); speaking = true; readBtn.setAttribute('aria-pressed','true');
+}
+function stopSpeaking(){
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+  speaking = false; readBtn.setAttribute('aria-pressed','false');
+}
+readBtn.addEventListener('click', ()=>{ speaking ? stopSpeaking() : speak(); });
+if(!('speechSynthesis' in window)) readBtn.style.display = 'none';
+
+// go
+render('intro');
+</script>
+</body>
+</html>

@@ -1,0 +1,444 @@
+<!--
+  ============================================================
+  BE SMART, STAY SAFE — Year 8 HPE Illicit Drugs activity hub
+  ============================================================
+
+  HOW TO ADD YOUR ARTIFACTS  (this is the only part you edit)
+  ------------------------------------------------------------
+  1. Publish your Claude artifact so it has a share link.
+  2. Find the matching activity in the ACTIVITIES list below.
+  3. Paste the link between the quotes after  embedUrl:
+        embedUrl: "https://claude.site/artifacts/xxxxxxxx"
+  4. Save. The card turns from "Coming soon" to a live "Open" button.
+
+  To ADD another activity to a lesson: copy a whole { ... } block,
+  paste it below, and change the details.
+  To HIDE an activity: delete its { ... } block, or leave embedUrl "".
+
+  Everything else on the page builds itself from this list.
+  ============================================================
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Making Safer Choices — Year 8 Activity Hub</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    /* ---- school colours ---- */
+    --navy:       #2E2F5B;   /* primary — text, headers, buttons */
+    --blue:       #91ADDA;   /* soft blue — highlights, accents  */
+    --white:      #FFFFFF;
+
+    --ink:        #2E2F5B;   /* main text (navy)                 */
+    --ink-soft:   #5B5D86;   /* secondary text (muted navy)      */
+    --page:       #EEF2F9;   /* soft blue-tinted page background  */
+    --card:       #FFFFFF;   /* card surface                     */
+    --line:       #D6DEEE;   /* hairlines / borders              */
+    --accent:     #2E2F5B;   /* action accent (navy)             */
+    --accent-hi:  #3D3E78;   /* hover                            */
+    --focus:      #2E2F5B;
+
+    /* phase bars — a navy→soft-blue ramp that gently signals
+       progression through the unit. Decorative only (no text). */
+    --p1:#2E2F5B;  --p2:#414475;  --p3:#54588E;
+    --p4:#676CA3;  --p5:#7A82BC;  --p6:#8698CB;  --p7:#91ADDA;
+
+    --radius:16px;
+    --shadow:0 1px 2px rgba(46,47,91,.06), 0 10px 30px -18px rgba(46,47,91,.38);
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--page); color:var(--ink);
+    font-family:"Instrument Sans",system-ui,sans-serif;
+    font-size:16px; line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit}
+
+  .wrap{max-width:1060px; margin:0 auto; padding:0 22px}
+
+  /* ---------- header / hero ---------- */
+  header.hero{
+    padding:56px 0 34px; position:relative; overflow:hidden;
+  }
+  .eyebrow{
+    font-size:.78rem; letter-spacing:.16em; text-transform:uppercase;
+    font-weight:600; color:var(--p1);
+    display:inline-flex; align-items:center; gap:9px;
+  }
+  .eyebrow::before{content:""; width:26px; height:2px; background:var(--blue); border-radius:2px}
+  h1{
+    font-family:"Bricolage Grotesque",sans-serif;
+    font-weight:700; font-size:clamp(2.5rem,7vw,4.4rem);
+    line-height:.98; letter-spacing:-.02em; margin:.35em 0 .28em;
+    max-width:14ch;
+  }
+  h1 .amp{background:var(--blue); color:var(--navy); padding:0 .12em; border-radius:8px; -webkit-box-decoration-break:clone; box-decoration-break:clone}
+  .lede{
+    font-size:1.12rem; color:var(--ink-soft); max-width:56ch; margin:0;
+  }
+  .hero-meta{
+    margin-top:26px; display:flex; flex-wrap:wrap; gap:10px 22px;
+    font-size:.9rem; color:var(--ink-soft);
+  }
+  .hero-meta span{display:inline-flex; align-items:center; gap:7px}
+  .dot{width:8px; height:8px; border-radius:50%; background:var(--p1)}
+
+  /* soft breathing motif top-right */
+  .halo{
+    position:absolute; top:-120px; right:-90px; width:360px; height:360px;
+    border-radius:50%; pointer-events:none; z-index:-1;
+    background:radial-gradient(circle at 50% 50%, rgba(145,173,218,.30), transparent 68%);
+    animation:breathe 9s ease-in-out infinite;
+  }
+  @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+
+  /* ---------- phase section ---------- */
+  main{padding-bottom:40px}
+  .phase{padding:30px 0 6px; scroll-margin-top:20px}
+  .phase-head{display:flex; align-items:baseline; gap:14px; margin-bottom:18px; flex-wrap:wrap}
+  .phase-num{
+    font-family:"Bricolage Grotesque",sans-serif; font-weight:700;
+    font-size:.95rem; color:#fff; background:var(--navy);
+    width:30px; height:30px; border-radius:9px;
+    display:grid; place-items:center; flex:none;
+  }
+  .phase-title{font-family:"Bricolage Grotesque",sans-serif; font-weight:600; font-size:1.5rem; letter-spacing:-.01em; margin:0}
+  .phase-lessons{font-size:.85rem; color:var(--ink-soft); font-weight:500}
+
+  .grid{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(268px,1fr));
+    gap:16px;
+  }
+
+  /* ---------- activity card ---------- */
+  .card{
+    position:relative; background:var(--card); border:1px solid var(--line);
+    border-radius:var(--radius); padding:20px 20px 18px 22px;
+    box-shadow:var(--shadow); display:flex; flex-direction:column;
+    min-height:184px; overflow:hidden;
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .card::before{content:""; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--pc)}
+  .card:hover{transform:translateY(-3px); box-shadow:0 1px 2px rgba(46,47,91,.06), 0 18px 40px -20px rgba(46,47,91,.45)}
+  .card .lesson{font-size:.72rem; letter-spacing:.09em; text-transform:uppercase; font-weight:600; color:var(--ink-soft)}
+  .tag{
+    align-self:flex-start; font-size:.7rem; font-weight:600; letter-spacing:.02em;
+    color:var(--navy); background:color-mix(in srgb, var(--blue) 40%, white);
+    padding:3px 9px; border-radius:20px; margin:9px 0 6px;
+  }
+  .card h3{font-family:"Bricolage Grotesque",sans-serif; font-weight:600; font-size:1.16rem; letter-spacing:-.01em; margin:2px 0 6px; line-height:1.15}
+  .card p{font-size:.9rem; color:var(--ink-soft); margin:0 0 16px}
+  .card .foot{margin-top:auto}
+
+  .btn{
+    appearance:none; border:0; cursor:pointer; font-family:inherit; font-weight:600;
+    font-size:.92rem; border-radius:10px; padding:10px 15px;
+    display:inline-flex; align-items:center; gap:8px; text-decoration:none;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .btn-open{background:var(--accent); color:#fff}
+  .btn-open:hover{background:var(--accent-hi)}
+  .btn-open:active{transform:scale(.97)}
+  .btn svg{width:16px; height:16px}
+
+  .soon{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:.85rem; font-weight:600; color:var(--ink-soft);
+    border:1px dashed var(--line); border-radius:10px; padding:9px 14px; background:#fbfcfb;
+  }
+  .card.pending{background:#fbfcfb}
+  .card.pending::before{opacity:.4}
+  .soon.assess{color:var(--navy); border-color:var(--blue); background:#f2f6fc}
+
+  /* ---------- support strip ---------- */
+  .support{
+    background:var(--ink); color:#eaf2f0; border-radius:var(--radius);
+    padding:26px 26px; margin:30px 0 46px;
+    display:grid; grid-template-columns:1.2fr 2fr; gap:22px 34px; align-items:center;
+  }
+  .support h4{font-family:"Bricolage Grotesque",sans-serif; font-weight:600; font-size:1.25rem; margin:0 0 6px; color:#fff}
+  .support p{margin:0; font-size:.92rem; color:#c2c9e6}
+  .lines{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  .lines a{
+    text-decoration:none; display:flex; flex-direction:column; gap:5px; padding:14px 16px;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+    border-radius:11px; transition:background .15s ease;
+  }
+  .lines a:hover{background:rgba(255,255,255,.13)}
+  .lines .name{font-weight:600; font-size:.92rem; color:#fff; line-height:1.2}
+  .lines .num{font-size:1.05rem; font-weight:600; color:var(--blue); letter-spacing:.01em; line-height:1.2}
+  .lines .who{font-size:.78rem; color:#9aa4cd; line-height:1.3}
+
+  footer.pagefoot{padding:8px 0 40px; color:var(--ink-soft); font-size:.82rem; text-align:center}
+
+  /* ---------- modal ---------- */
+  .modal{
+    position:fixed; inset:0; z-index:60; display:none;
+    background:rgba(46,47,91,.55); backdrop-filter:blur(3px);
+    padding:clamp(12px,4vw,40px);
+  }
+  .modal.open{display:grid; place-items:stretch}
+  .modal-inner{
+    background:#fff; border-radius:16px; overflow:hidden;
+    display:flex; flex-direction:column; width:100%; height:100%;
+    max-width:1100px; max-height:900px; margin:auto; box-shadow:0 30px 80px -20px rgba(0,0,0,.6);
+  }
+  .modal-bar{
+    display:flex; align-items:center; gap:12px; padding:12px 16px;
+    border-bottom:1px solid var(--line); flex:none;
+  }
+  .modal-bar .title{font-family:"Bricolage Grotesque",sans-serif; font-weight:600; font-size:1rem; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .modal-bar .ext{color:var(--focus); text-decoration:none; font-size:.85rem; font-weight:600; display:inline-flex; align-items:center; gap:6px; white-space:nowrap}
+  .modal-bar .ext svg{width:15px;height:15px}
+  .x{appearance:none; border:0; background:var(--page); width:36px; height:36px; border-radius:9px; cursor:pointer; display:grid; place-items:center}
+  .x:hover{background:#dbe2f1}
+  .x svg{width:18px;height:18px}
+  .modal-body{position:relative; flex:1; background:var(--page)}
+  .modal-body iframe{width:100%; height:100%; border:0; display:block}
+  .hint{
+    position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
+    font-size:.8rem; background:#fff; color:var(--ink-soft); padding:8px 14px;
+    border-radius:20px; box-shadow:var(--shadow); border:1px solid var(--line);
+  }
+
+  :focus-visible{outline:3px solid var(--focus); outline-offset:2px; border-radius:6px}
+
+  @media (max-width:720px){
+    .support{grid-template-columns:1fr}
+    .lines{grid-template-columns:1fr}
+  }
+  /* staggered reveal on load */
+  .reveal{opacity:0; transform:translateY(10px); animation:rise .5s ease forwards}
+  @keyframes rise{to{opacity:1; transform:none}}
+
+  /* Reduced-motion users get no animation. Because .reveal above starts at
+     opacity:0 and relies on the 'rise' animation to fade in, we must also make
+     .reveal visible immediately here — otherwise the cards stay stuck invisible
+     (content is in the page but never drawn to screen). This block must sit
+     AFTER the .reveal rule above so it wins on source order. */
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important; transition:none !important; scroll-behavior:auto}
+    .reveal{opacity:1; transform:none}
+  }
+  .backlink{display:inline-flex;align-items:center;gap:7px;margin-bottom:18px;
+    font-family:"Instrument Sans",system-ui,sans-serif;font-weight:600;font-size:.9rem;
+    color:var(--navy);text-decoration:none;background:rgba(255,255,255,.72);
+    border:1px solid var(--line);padding:7px 15px;border-radius:22px;transition:background .15s;}
+  .backlink:hover{background:#fff;}
+  .backlink:focus-visible{outline:3px solid var(--navy);outline-offset:2px;}
+</style>
+
+<header class="hero">
+  <div class="halo"></div>
+  <div class="wrap">
+    <a class='backlink' href='/'>← HPE Hub</a>
+    <span class="eyebrow">Year 8 HPE · Illicit Drugs</span>
+    <h1>Making <span class="amp">Safer</span> Choices</h1>
+    <p class="lede">Your class activity hub. Every interactive task for the unit lives here — open one, have a go, and learn how to make safer choices and help others do the same.</p>
+    <div class="hero-meta">
+      <span><span class="dot"></span> 15 lessons</span>
+      <span><span class="dot"></span> Harm minimisation approach</span>
+      <span><span class="dot"></span> Tap a card to start</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="phases"></div>
+
+  <!-- calm, optional support strip: good practice for a student-facing drug-ed page -->
+  <section class="support" aria-label="Where to get help">
+    <div>
+      <h4>Need to talk to someone?</h4>
+      <p>These are free, private services in Australia. It's okay to reach out — for yourself or for a friend.</p>
+    </div>
+    <div class="lines">
+      <a href="tel:1800551800"><span class="name">Kids Helpline</span><span class="num">1800 55 1800</span><span class="who">Ages 5–25 · 24/7</span></a>
+      <a href="tel:1300858584"><span class="name">ADF DrugInfo</span><span class="num">1300 85 85 84</span><span class="who">Alcohol & Drug Foundation</span></a>
+      <a href="tel:131114"><span class="name">Lifeline</span><span class="num">13 11 14</span><span class="who">Crisis support · 24/7</span></a>
+      <a href="https://au.reachout.com" target="_blank" rel="noopener"><span class="name">ReachOut</span><span class="num">au.reachout.com</span><span class="who">Youth wellbeing info</span></a>
+    </div>
+  </section>
+</main>
+
+<footer class="pagefoot wrap">
+  Year 8 HPE · Illicit Drugs · activity hub · built for classroom use
+</footer>
+
+<!-- activity modal -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-inner">
+    <div class="modal-bar">
+      <span class="title" id="modalTitle">Activity</span>
+      <a class="ext" id="modalExt" href="#" target="_blank" rel="noopener">
+        Open in new tab
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9M18 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6"/></svg>
+      </a>
+      <button class="x" id="modalClose" aria-label="Close activity">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <iframe id="modalFrame" title="Interactive activity" allow="fullscreen"></iframe>
+      <div class="hint">Not loading? Use “Open in new tab” above.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   1) THE PHASES  (stages of the unit — the coloured sections)
+   ============================================================ */
+const PHASES = [
+  { id:1, title:"Know your drugs",                        lessons:"Lessons 1–2",   colour:"var(--p1)" },
+  { id:2, title:"Why people use",                         lessons:"Lessons 3–4",   colour:"var(--p2)" },
+  { id:3, title:"Saying no & staying safe",               lessons:"Lessons 5–6",   colour:"var(--p3)" },
+  { id:4, title:"Assessment A · Party Safety Plan",       lessons:"Lesson 7",      colour:"var(--p4)" },
+  { id:5, title:"Dependence & harm minimisation",         lessons:"Lessons 8–10",  colour:"var(--p5)" },
+  { id:6, title:"Finding & using evidence",               lessons:"Lessons 11–14", colour:"var(--p6)" },
+  { id:7, title:"Assessment B · Responding to a Friend",  lessons:"Lesson 15",     colour:"var(--p7)" },
+];
+
+/* ============================================================
+   2) THE ACTIVITIES  — paste your artifact links into embedUrl
+   ============================================================
+   phase    = which section above (1–7)
+   lesson   = short label shown on the card
+   type     = the kind of task (shows as a little pill)
+   title    = the activity name students see
+   blurb    = one line of plain description
+   embedUrl = "" for now -> paste your published/relative link here
+   kind:"assessment" marks a teacher-led task (no student "open")
+   ============================================================ */
+const ACTIVITIES = [
+  // ---- Phase 1: Know your drugs (L1–2) ----
+  { phase:1, lesson:"Lesson 1", type:"Sort · print", title:"Drug Category Sort",         blurb:"Sort drug names and their short- and long-term effects into stimulant, depressant, hallucinogen, opioid, or ‘common to all drugs’.", embedUrl:"Drug_Category_Sort.html" },
+  { phase:1, lesson:"Lesson 2", type:"Sort · print", title:"Legal, Illegal or Illicit?", blurb:"Decide how the law treats 15 everyday scenarios — including the tricky ‘illicit’ misuse of otherwise-legal drugs.", embedUrl:"Legal_Illegal_Illicit_Sort.html" },
+  { phase:1, lesson:"Lesson 2", type:"Game",       title:"Mix & match: key words",       blurb:"Match eight key words to their meanings — the four drug classes plus legal, illegal and illicit.", embedUrl:"Mix_and_Match_Key_Words.html" },
+
+  // ---- Phase 2: Why people use (L3–4) ----
+  { phase:2, lesson:"Lesson 3", type:"Sorter",     title:"Direct or indirect?",          blurb:"Decide whether each peer-pressure example is direct or indirect, with instant feedback.", embedUrl:"Direct_or_Indirect.html" },
+  { phase:2, lesson:"Lesson 3", type:"Sorter",     title:"What kind of influence?",             blurb:"Sort real examples into social, emotional and environmental influences.", embedUrl:"What_Kind_of_Influence.html" },
+  { phase:2, lesson:"Lesson 4", type:"Scenario",   title:"Spot the influences",          blurb:"Read three scenarios and tick the social, emotional and environmental influences you can spot. Has a read-aloud option.", embedUrl:"Spot_the_Influences.html" },
+
+  // ---- Phase 3: Saying no & staying safe (L5–6) ----
+  { phase:3, lesson:"Lesson 5", type:"Story game", title:"Party Night: Choose Your Path", blurb:"A branching story where your refusal choices lead to six different endings — from home safe to a rough night. Practise saying no.", embedUrl:"Party_Choose_Your_Path.html" },
+  { phase:3, lesson:"Lesson 6", type:"Sorter",     title:"Spot the risks",               blurb:"Sort risks from a party scenario into physical, social, emotional and legal.", embedUrl:"Spot_the_Risks.html" },
+
+  // ---- Phase 4: Assessment A (L7) ----
+  { phase:4, lesson:"Lesson 7", kind:"assessment", type:"Assessment A", title:"My Party Safety Plan", blurb:"Strand A task: risks, refusal strategies, a before/during/if-it-goes-wrong plan, and justification. Handed out in class.", embedUrl:"" },
+
+  // ---- Phase 5: Dependence & harm minimisation (L8–10) ----
+  { phase:5, lesson:"Lesson 8",  type:"Sort · print", title:"Common to all drugs (revisit)", blurb:"Return to the Drug Category Sort, focusing on dependence, tolerance and withdrawal — the effects shared by all drugs.", embedUrl:"Drug_Category_Sort.html" },
+  { phase:5, lesson:"Lesson 9",  type:"Sorter",    title:"The three pillars",            blurb:"Sort real examples into harm, demand and supply reduction.", embedUrl:"Three_Pillars.html" },
+  { phase:5, lesson:"Lesson 10", type:"Check",     title:"Safe medicine check",          blurb:"Decide whether each action with a prescription medicine is safe or risky.", embedUrl:"Safe_Medicine_Check.html" },
+
+  // ---- Phase 6: Finding & using evidence (L11–14) ----
+  { phase:6, lesson:"Lesson 11", type:"Sorter",    title:"Trusted or not?",              blurb:"Sort health sources into credible and unreliable, with a reason for each.", embedUrl:"Trusted_or_Not.html" },
+  { phase:6, lesson:"Lesson 12", type:"Data",      title:"Read the graph",               blurb:"Read a graph of opioid-harm trends (practice data based on AIHW) and answer questions.", embedUrl:"Read_the_Graph.html" },
+  { phase:6, lesson:"Lesson 13", type:"Research",  title:"Fact finder",                  blurb:"Pick the best way to put a reliable health fact into your own words — without copying or changing the meaning.", embedUrl:"Fact_Finder.html" },
+  { phase:6, lesson:"Lesson 14", type:"Builder",   title:"Respond to a friend",          blurb:"Build a caring, accurate reply to a friend worried about codeine, using sentence starters.", embedUrl:"Respond_to_a_Friend.html" },
+
+  // ---- Phase 7: Assessment B (L15) ----
+  { phase:7, lesson:"Lesson 15", kind:"assessment", type:"Assessment B", title:"Responding to a Friend", blurb:"Strand B task: reply to a friend worried about codeine dependence, using research, a statistic and empathy. Handed out in class.", embedUrl:"" },
+];
+
+/* ============================================================
+   3) BUILD THE PAGE  (no need to edit below here)
+   ============================================================ */
+const svgOpen = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>';
+const svgLock = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+
+const root = document.getElementById('phases');
+let delay = 0;
+
+PHASES.forEach(phase=>{
+  const items = ACTIVITIES.filter(a=>a.phase===phase.id);
+  if(!items.length) return;
+
+  const section = document.createElement('section');
+  section.className = 'phase';
+  section.id = 'phase-'+phase.id;
+  section.style.setProperty('--pc', phase.colour);
+
+  const head = document.createElement('div');
+  head.className = 'phase-head';
+  head.innerHTML =
+    '<div class="phase-num">'+phase.id+'</div>'+
+    '<h2 class="phase-title">'+phase.title+'</h2>'+
+    '<span class="phase-lessons">'+phase.lessons+'</span>';
+  section.appendChild(head);
+
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+
+  items.forEach(a=>{
+    const live = a.embedUrl && a.embedUrl.trim().length>0;
+    const isAssess = a.kind === 'assessment';
+    const card = document.createElement('article');
+    card.className = 'card reveal' + ((!live && !isAssess)?' pending':'');
+    card.style.setProperty('--pc', phase.colour);
+    card.style.animationDelay = (delay+=40)+'ms';
+
+    let foot;
+    if(isAssess){
+      foot = '<span class="soon assess">'+svgLock+' Teacher-led task</span>';
+    } else if(live){
+      foot = '<button class="btn btn-open" data-url="'+encodeURIComponent(a.embedUrl.trim())+'" data-title="'+escapeAttr(a.title)+'">Open '+svgOpen+'</button>';
+    } else {
+      foot = '<span class="soon">'+svgLock+' Coming soon</span>';
+    }
+
+    card.innerHTML =
+      '<span class="lesson">'+a.lesson+'</span>'+
+      '<span class="tag">'+a.type+'</span>'+
+      '<h3>'+escapeHtml(a.title)+'</h3>'+
+      '<p>'+escapeHtml(a.blurb)+'</p>'+
+      '<div class="foot">'+foot+'</div>';
+    grid.appendChild(card);
+  });
+
+  section.appendChild(grid);
+  root.appendChild(section);
+});
+
+/* ---------- modal wiring ---------- */
+const modal   = document.getElementById('modal');
+const frame   = document.getElementById('modalFrame');
+const mTitle  = document.getElementById('modalTitle');
+const mExt    = document.getElementById('modalExt');
+let lastFocus = null;
+
+document.addEventListener('click', e=>{
+  const btn = e.target.closest('.btn-open');
+  if(!btn) return;
+  const url = decodeURIComponent(btn.dataset.url);
+  lastFocus = btn;
+  mTitle.textContent = btn.dataset.title || 'Activity';
+  mExt.href = url;
+  frame.src = url;
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('modalClose').focus();
+});
+
+function closeModal(){
+  modal.classList.remove('open');
+  frame.src = 'about:blank';
+  document.body.style.overflow = '';
+  if(lastFocus) lastFocus.focus();
+}
+document.getElementById('modalClose').addEventListener('click', closeModal);
+modal.addEventListener('click', e=>{ if(e.target===modal) closeModal(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && modal.classList.contains('open')) closeModal(); });
+
+/* ---------- tiny helpers ---------- */
+function escapeHtml(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function escapeAttr(s){return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+</script>

@@ -1,6 +1,5 @@
-import { defineConfig, envField } from 'astro/config'
+import { defineConfig } from 'astro/config'
 import { fileURLToPath } from 'url'
-import compress from 'astro-compress'
 import icon from 'astro-icon'
 import mdx from '@astrojs/mdx'
 import sitemap from '@astrojs/sitemap'
@@ -26,6 +25,7 @@ const viteConfig = {
       '@layouts': fileURLToPath(new URL('./src/layouts', import.meta.url)),
       '@assets': fileURLToPath(new URL('./src/assets', import.meta.url)),
       '@content': fileURLToPath(new URL('./src/content', import.meta.url)),
+      '@data': fileURLToPath(new URL('./src/data', import.meta.url)),
       '@pages': fileURLToPath(new URL('./src/pages', import.meta.url)),
       '@public': fileURLToPath(new URL('./public', import.meta.url)),
       '@post-images': fileURLToPath(new URL('./public/posts', import.meta.url)),
@@ -39,17 +39,8 @@ const viteConfig = {
 // https://astro.build/config
 export default defineConfig({
   compressHTML: true,
-  site: 'https://accessible-astro-starter.incluud.dev',
-  integrations: [compress(), icon(), mdx(), sitemap()],
+  // Replace this with the final custom domain before the first production deployment.
+  site: 'https://hpe-activity-hub.netlify.app',
+  integrations: [icon(), mdx(), sitemap()],
   vite: enhanceConfigForWorkspace(viteConfig),
-  env: {
-    schema: {
-      BLOG_API_URL: envField.string({
-        context: 'server',
-        access: 'secret',
-        optional: true,
-        default: 'https://jsonplaceholder.typicode.com/posts',
-      }),
-    },
-  },
 })

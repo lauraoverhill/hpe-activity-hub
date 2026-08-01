@@ -1,20 +1,55 @@
-// 1. Import utilities from `astro:content`
 import { defineCollection } from 'astro:content'
+import { glob } from 'astro/loaders'
 import { z } from 'astro/zod'
 
-// 2. Import loader(s)
-import { glob } from 'astro/loaders'
+const audience = z.enum(['learner', 'teacher'])
 
-// 3. Define your collection(s)
-const projects = defineCollection({
-  loader: glob({ pattern: '**/*.mdx', base: './src/content/projects' }),
+const units = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/units' }),
   schema: z.object({
     title: z.string(),
-    author: z.string(),
     description: z.string(),
-    tags: z.array(z.string()).default([]),
+    yearLevels: z.array(z.string()).default([]),
+    audience: z.array(audience).default(['teacher', 'learner']),
+    status: z.enum(['draft', 'published']).default('draft'),
   }),
 })
 
-// 4. Export a single `collections` object to register you collection(s)
-export const collections = { projects }
+const activities = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/activities' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    unit: z.string().optional(),
+    yearLevels: z.array(z.string()).default([]),
+    duration: z.string().optional(),
+    audience: audience.default('learner'),
+    status: z.enum(['draft', 'published']).default('draft'),
+  }),
+})
+
+const resources = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/resources' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    resourceType: z.enum(['lesson-plan', 'worksheet', 'assessment', 'guidance', 'other']),
+    unit: z.string().optional(),
+    yearLevels: z.array(z.string()).default([]),
+    audience: audience.default('teacher'),
+    status: z.enum(['draft', 'published']).default('draft'),
+  }),
+})
+
+const tools = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/tools' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    audience: z.array(audience).default(['teacher', 'learner']),
+    status: z.enum(['draft', 'published']).default('draft'),
+    externalUrl: z.string().url().optional(),
+  }),
+})
+
+export const collections = { units, activities, resources, tools }

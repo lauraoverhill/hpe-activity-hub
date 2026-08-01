@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mix &amp; Match: Key Words — Year 8 Health</title>
+<style>
+  :root{
+    --navy:#2e2f5b; --blue:#91adda; --paper:#eef2f9; --card:#ffffff;
+    --ink:#2e2f5b; --muted:#5b5d86; --line:#d6deee;
+    --ok:#1f7a52; --ok-bg:#e2f3ea; --bad:#a3243c; --bad-bg:#f7dde2;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--paper); color:var(--ink);
+    font-family:'Helvetica Neue',Arial,sans-serif; padding:24px 16px 60px; line-height:1.5;}
+  .wrap{max-width:760px; margin:0 auto;}
+  .eyebrow{font-size:11px; letter-spacing:.16em; text-transform:uppercase; font-weight:700; color:var(--navy);}
+  h1{font-family:Georgia,serif; font-size:26px; margin:4px 0 6px;}
+  h1 .hl{background:var(--blue); color:var(--navy); padding:0 .12em; border-radius:6px;}
+  .intro{font-size:14.5px; color:var(--muted); margin:0 0 18px; max-width:60ch;}
+
+  .bar{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:16px;}
+  .count{font-size:12.5px; font-weight:700; color:var(--navy); background:#fff; border:1px solid var(--line); padding:6px 12px; border-radius:999px;}
+  .btn{border:1.5px solid var(--line); background:#fff; color:var(--navy); font-weight:700; font-size:13px;
+    padding:8px 14px; border-radius:999px; cursor:pointer; font-family:inherit;}
+  .btn:hover{background:#f2f6fc;} .btn:focus-visible{outline:3px solid var(--navy); outline-offset:2px;}
+  .btn[aria-pressed="true"]{background:var(--navy); color:#fff; border-color:var(--navy);}
+
+  .cols{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:560px){ .cols{grid-template-columns:1fr;} }
+  .colhead{font-size:11px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--blue); margin:0 0 8px;}
+  .stack{display:flex; flex-direction:column; gap:10px;}
+  .tile{width:100%; text-align:left; background:#fff; border:1.5px solid var(--line); border-radius:12px;
+    padding:13px 15px; font-size:14.5px; color:var(--ink); cursor:pointer; font-family:inherit;
+    transition:border-color .12s, background .12s, transform .06s;}
+  .tile.term{font-weight:700;}
+  .tile:hover{border-color:var(--navy);}
+  .tile.sel{border-color:var(--navy); background:#eef3fb; box-shadow:0 0 0 3px rgba(46,47,91,.12);}
+  .tile.matched{background:var(--ok-bg); border-color:var(--ok); color:var(--ok); cursor:default;}
+  .tile.matched::after{content:" ✓"; font-weight:800;}
+  .tile.wrong{animation:shake .35s; border-color:var(--bad); background:var(--bad-bg);}
+  @keyframes shake{0%,100%{transform:none}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+
+  .done{margin-top:18px; background:var(--ok-bg); border:1px solid var(--ok); color:var(--ok);
+    border-radius:12px; padding:14px 16px; font-weight:700; display:none;}
+  .done.show{display:block;}
+
+  .answers{margin-top:18px; display:none;}
+  .answers.show{display:block;}
+  .answers table{width:100%; border-collapse:collapse; font-size:13.5px; background:#fff; border:1px solid var(--line); border-radius:10px; overflow:hidden;}
+  .answers th{background:var(--navy); color:#fff; text-align:left; padding:8px 10px; font-size:12px;}
+  .answers td{padding:8px 10px; border-top:1px solid var(--line); vertical-align:top;}
+  .answers td:first-child{font-weight:700; white-space:nowrap; color:var(--navy);}
+
+  @media print{
+    .bar,.done{display:none !important;}
+    .tile{border:1px solid #999 !important; box-shadow:none !important;}
+    .answers{display:block !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Year 8 Health · Lessons 1–2</div>
+  <h1>Mix &amp; Match: <span class="hl">Key Words</span></h1>
+  <p class="intro">Click a word on the left, then click its meaning on the right. Correct pairs turn green and lock in. Match all eight to finish.</p>
+
+  <div class="bar">
+    <span class="count" id="count">Matched: 0 / 8</span>
+    <button class="btn" id="shuffle">↻ Shuffle</button>
+    <button class="btn" id="reset">Reset</button>
+    <button class="btn" id="showAns" aria-pressed="false">Show answers (teacher)</button>
+  </div>
+
+  <div class="cols">
+    <div><p class="colhead">Word</p><div class="stack" id="terms"></div></div>
+    <div><p class="colhead">Meaning</p><div class="stack" id="defs"></div></div>
+  </div>
+
+  <div class="done" id="done">🎉 All matched! Great work. Hit Reset or Shuffle to try again.</div>
+
+  <div class="answers" id="answers">
+    <table><thead><tr><th>Word</th><th>Meaning</th></tr></thead><tbody id="ansBody"></tbody></table>
+  </div>
+</div>
+
+<script>
+const PAIRS = [
+  {term:"Drug",        def:"Any substance that changes how your body or mind works."},
+  {term:"Stimulant",   def:"Speeds up the messages between the brain and body — you might feel more awake or alert."},
+  {term:"Depressant",  def:"Slows down the messages between the brain and body — you might feel relaxed or sleepy."},
+  {term:"Hallucinogen",def:"Changes what a person sees, hears or feels, and can cause hallucinations."},
+  {term:"Opioid",      def:"A strong painkiller drug that slows the body down and can be very addictive."},
+  {term:"Legal",       def:"Allowed by law — for example, caffeine in a soft drink."},
+  {term:"Illegal",     def:"Against the law — for example, selling heroin."},
+  {term:"Illicit",     def:"Using a drug in a way that breaks the rules or law — even a legal one, like misusing a prescription medicine."}
+];
+
+const TOTAL = PAIRS.length;
+let selected = null, matched = 0;
+const termsEl=document.getElementById('terms'), defsEl=document.getElementById('defs');
+const countEl=document.getElementById('count'), doneEl=document.getElementById('done');
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function build(){
+  selected=null; matched=0; doneEl.classList.remove('show');
+  countEl.textContent = `Matched: 0 / ${TOTAL}`;
+  termsEl.innerHTML=''; defsEl.innerHTML='';
+  shuffle(PAIRS).forEach(p=>{
+    const t=document.createElement('button'); t.className='tile term'; t.textContent=p.term; t.dataset.key=p.term;
+    t.addEventListener('click',()=>pickTerm(t)); termsEl.appendChild(t);
+  });
+  shuffle(PAIRS).forEach(p=>{
+    const d=document.createElement('button'); d.className='tile def'; d.textContent=p.def; d.dataset.key=p.term;
+    d.addEventListener('click',()=>pickDef(d)); defsEl.appendChild(d);
+  });
+}
+function pickTerm(t){
+  if(t.classList.contains('matched'))return;
+  termsEl.querySelectorAll('.tile').forEach(x=>x.classList.remove('sel'));
+  selected=t; t.classList.add('sel');
+}
+function pickDef(d){
+  if(d.classList.contains('matched')||!selected)return;
+  if(d.dataset.key===selected.dataset.key){
+    d.classList.add('matched'); selected.classList.add('matched'); selected.classList.remove('sel');
+    selected=null; matched++; countEl.textContent=`Matched: ${matched} / ${TOTAL}`;
+    if(matched===TOTAL) doneEl.classList.add('show');
+  } else {
+    d.classList.add('wrong'); const s=selected;
+    setTimeout(()=>{d.classList.remove('wrong'); s&&s.classList.remove('sel');},350);
+    selected=null;
+  }
+}
+document.getElementById('shuffle').addEventListener('click',build);
+document.getElementById('reset').addEventListener('click',build);
+
+// teacher answers
+const ansBody=document.getElementById('ansBody');
+PAIRS.forEach(p=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${p.term}</td><td>${p.def}</td>`;ansBody.appendChild(tr);});
+const showAns=document.getElementById('showAns');
+showAns.addEventListener('click',()=>{
+  const on=document.getElementById('answers').classList.toggle('show');
+  showAns.setAttribute('aria-pressed',on);
+});
+
+build();
+</script>
+
+<!-- Read aloud (accessibility support; self-contained, no libraries, no data collected) -->
+<script>
+(function(){
+  if(!('speechSynthesis' in window)) return;            // unsupported: add nothing
+  var wrap = document.querySelector('.wrap') || document.body;
+  var h1 = wrap.querySelector('h1');
+  if(!h1) return;
+
+  // Button styling (uses the page's palette tokens, with safe fallbacks)
+  if(!document.querySelector('style[data-readaloud]')){
+    var st = document.createElement('style');
+    st.setAttribute('data-readaloud','');
+    st.textContent =
+      '.readrow{margin:10px 0 16px;}'+
+      '.ra-btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line,#d6deee);'+
+      'background:#fff;color:var(--navy,#2e2f5b);font-family:inherit;font-size:13px;font-weight:600;'+
+      'padding:8px 14px;border-radius:999px;cursor:pointer;}'+
+      '.ra-btn:hover{background:#f2f6fc;}'+
+      '.ra-btn:focus-visible{outline:3px solid var(--navy,#2e2f5b);outline-offset:2px;}'+
+      '.ra-btn[aria-pressed="true"]{background:var(--navy,#2e2f5b);color:#fff;border-color:var(--navy,#2e2f5b);}';
+    document.head.appendChild(st);
+  }
+
+  // Build the button and place it after the intro (or the heading if there is none)
+  var row = document.createElement('div'); row.className='readrow';
+  var btn = document.createElement('button');
+  btn.type='button'; btn.className='ra-btn'; btn.setAttribute('aria-pressed','false');
+  btn.setAttribute('aria-label','Read this activity aloud');
+  btn.textContent='🔊 Read aloud';
+  row.appendChild(btn);
+  var anchor = wrap.querySelector('.intro, .lead, .sub') || h1;
+  anchor.parentNode.insertBefore(row, anchor.nextSibling);
+
+  // Collect the visible, readable text from the live page (skips controls + chrome + hidden bits)
+  var SKIP='button,.btn,.opt,.iconbtn,.ra-btn,select,option,input,textarea,.eyebrow,.prog,.progress,.count,.score,footer,.readrow';
+  function readable(){
+    var parts=[], walker=document.createTreeWalker(wrap, NodeFilter.SHOW_TEXT, {
+      acceptNode:function(n){
+        if(!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        var p=n.parentElement; if(!p) return NodeFilter.FILTER_REJECT;
+        if(p.closest(SKIP)) return NodeFilter.FILTER_REJECT;
+        var s=window.getComputedStyle(p);
+        if(s.display==='none'||s.visibility==='hidden'||parseFloat(s.opacity)===0) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    var n; while(n=walker.nextNode()){ parts.push(n.nodeValue.trim()); }
+    return parts.join(' ').replace(/\s+/g,' ').replace(/[\u2019]/g,"'").trim();
+  }
+
+  var speaking=false;
+  function stop(){ try{speechSynthesis.cancel();}catch(e){} speaking=false; btn.setAttribute('aria-pressed','false'); }
+  function start(){
+    stop();
+    var text=readable(); if(!text) return;
+    var u=new SpeechSynthesisUtterance(text); u.rate=0.95;
+    u.onend=function(){ speaking=false; btn.setAttribute('aria-pressed','false'); };
+    u.onerror=function(){ speaking=false; btn.setAttribute('aria-pressed','false'); };
+    speechSynthesis.speak(u); speaking=true; btn.setAttribute('aria-pressed','true');
+  }
+  btn.addEventListener('click', function(){ speaking?stop():start(); });
+  document.addEventListener('visibilitychange', function(){ if(document.hidden) stop(); });
+  window.addEventListener('pagehide', stop);
+})();
+</script>
+
+<!-- Printable worksheet / Save as PDF (self-contained, no libraries) -->
+<script>
+(function(){
+if(typeof window==='undefined')return;
+function buildBody(){
+  var pairs=(typeof PAIRS!=='undefined')?PAIRS:[]; var L=['A','B','C','D','E','F','G','H','I','J','K','L'];
+  var order=pairs.map(function(p,i){return i;}).sort(function(a,b){return pairs[a].def<pairs[b].def?-1:(pairs[a].def>pairs[b].def?1:0);});
+  var left=pairs.map(function(p,i){return '<li>'+esc(p.term)+' &nbsp;&mdash;&nbsp; ____</li>';}).join('');
+  var right=order.map(function(idx){return '<li>'+esc(pairs[idx].def)+'</li>';}).join('');
+  var pos={}; order.forEach(function(idx,i){pos[idx]=L[i];});
+  var rows=pairs.map(function(p,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(p.term)+'</td><td><b>'+pos[i]+'</b></td></tr>';}).join('');
+  var akey='<div class="ra-akey"><h3>Answer key</h3><table><tr><th>#</th><th>Key word</th><th>Letter</th></tr>'+rows+'</table></div>';
+  return '<p class="ws-intro"><b>Write the letter of the matching meaning in the blank next to each key word.</b></p><div class="matchwrap"><div class="mcol"><h4>Key words</h4><ol class="ws-list">'+left+'</ol></div><div class="mcol"><h4>Meanings</h4><ol type="A">'+right+'</ol></div></div>'+akey;
+}
+var esc=function(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
+(function(){
+  if(document.querySelector('style[data-print]')) return;
+  var s=document.createElement('style'); s.setAttribute('data-print','');
+  s.textContent=
+  '.ra-print{display:none;}'+
+  '.ra-print-btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line,#d6deee);background:#fff;color:var(--navy,#2e2f5b);font-family:inherit;font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;cursor:pointer;margin-left:6px;}'+
+  '.ra-print-btn:hover{background:#f2f6fc;}'+
+  '.ra-print-btn:focus-visible{outline:3px solid var(--navy,#2e2f5b);outline-offset:2px;}'+
+  '@media print{'+
+    '@page{margin:14mm;}'+
+    'html,body{background:#fff !important;}'+
+    'body>*:not(.ra-print){display:none !important;}'+
+    '.ra-print{display:block !important;color:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact;font:12pt/1.45 Georgia,"Times New Roman",serif;}'+
+    '.ra-print .ws-title{font-size:19pt;margin:0 0 3mm;}'+
+    '.ra-print .ws-meta{font-size:10.5pt;margin:0 0 4mm;border-bottom:1px solid #000;padding-bottom:2.5mm;}'+
+    '.ra-print .ws-intro{font-size:11pt;margin:0 0 4mm;}'+
+    '.ra-print ol.ws-list{margin:0;padding-left:7mm;}'+
+    '.ra-print ol.ws-list>li{margin:0 0 5mm;page-break-inside:avoid;break-inside:avoid;}'+
+    '.ra-print .ws-opts{margin-top:1.5mm;}'+
+    '.ra-print .opt-box{display:inline-block;margin:0 8mm 1mm 0;font-size:11pt;}'+
+    '.ra-print .box{display:inline-block;width:4mm;height:4mm;border:1.4px solid #000;margin-right:2mm;vertical-align:-1px;border-radius:50%;}'+
+    '.ra-print .box.sq{border-radius:1px;}'+
+    '.ra-print .opt-line{margin:1.5mm 0;}'+
+    '.ra-print .fact{font-style:italic;margin:1mm 0 1.5mm;}'+
+    '.ra-print .src{font-size:10.5pt;}'+
+    '.ra-print .ws-line{border-bottom:1px solid #000;height:8mm;margin:0 0 1mm;}'+
+    '.ra-print .msgbox,.ra-print .wordbank{border:1px solid #000;padding:3mm;margin:0 0 4mm;font-size:11pt;page-break-inside:avoid;break-inside:avoid;}'+
+    '.ra-print .wordbank ul{margin:1mm 0 2mm;padding-left:6mm;}'+
+    '.ra-print .ws-graph{margin:0 0 4mm;page-break-inside:avoid;break-inside:avoid;}'+
+    '.ra-print .ws-graph svg{max-width:150mm;height:auto;}'+
+    '.ra-print .matchwrap{display:flex;gap:8mm;}'+
+    '.ra-print .matchwrap .mcol{flex:1;}'+
+    '.ra-print .matchwrap ol{padding-left:7mm;}'+
+    '.ra-print .matchwrap li{margin:0 0 3mm;page-break-inside:avoid;}'+
+    '.ra-print .sc-title{margin:0 0 1mm;}'+
+    '.ra-print .sc-text{margin:0 0 1.5mm;}'+
+    '.ra-print .ra-akey{page-break-before:always;break-before:page;}'+
+    '.ra-print .ra-akey h3{font-size:14pt;border-top:2px solid #000;padding-top:3mm;margin:0 0 3mm;}'+
+    '.ra-print .ra-akey table{border-collapse:collapse;width:100%;font-size:10.5pt;}'+
+    '.ra-print .ra-akey td,.ra-print .ra-akey th{border:1px solid #000;padding:2mm 3mm;text-align:left;vertical-align:top;}'+
+    '.ra-print .ra-akey ul{margin:0;padding-left:6mm;}'+
+  '}';
+  document.head.appendChild(s);
+})();
+var host=document.querySelector('.readrow')||document.querySelector('.bar')||document.querySelector('.toolbar')||document.querySelector('.controls');
+if(!host){host=document.createElement('div');host.className='readrow';var a=document.querySelector('.intro,.lead,h1');if(a&&a.parentNode){a.parentNode.insertBefore(host,a.nextSibling);}else{document.body.appendChild(host);}}
+var btn=document.createElement('button');btn.type='button';btn.className='ra-print-btn';btn.textContent='\uD83D\uDDA8\uFE0F Print / Save PDF';host.appendChild(btn);
+var sheet=document.createElement('div');sheet.className='ra-print';document.body.appendChild(sheet);
+var title=((document.querySelector('h1')||{}).textContent||'Worksheet').trim();
+var introRaw=((document.querySelector('.intro,.lead')||{}).textContent||'').trim();
+var intro=(/\b(tap|click|drag|drop|turns? green|lock in)\b/i.test(introRaw))?'':introRaw;
+function wordCheck(){var el=document.querySelector('.defs');if(!el)return '';var defs=el.querySelectorAll('.def');if(defs.length){var items=Array.prototype.map.call(defs,function(dd){var b=dd.querySelector('b');var term=b?b.textContent.trim():'';var rest=(dd.textContent||'').trim();if(term&&rest.indexOf(term)===0)rest=rest.slice(term.length).trim();return '<li><b>'+esc(term)+'</b> \u2014 '+esc(rest)+'</li>';}).join('');return '<div class="wordbank"><b>Word check</b><ul>'+items+'</ul></div>';}return '<div class="wordbank"><b>Word check</b><div>'+esc(el.textContent.trim())+'</div></div>';}
+function render(body){sheet.innerHTML='<h2 class="ws-title">'+esc(title)+'</h2>'+'<div class="ws-meta">Name: _____________________________    Class: ____________    Date: ____________</div>'+(intro?'<p class="ws-intro">'+esc(intro)+'</p>':'')+wordCheck()+body;}
+btn.addEventListener('click',function(){try{render(buildBody());}catch(e){render('<p>Could not build the worksheet.</p>');}window.print();});
+})();
+</script>
+</body>
+</html>

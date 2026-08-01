@@ -1,0 +1,17 @@
+---
+import DefaultLayout from '@layouts/DefaultLayout.astro'
+import { Heading } from 'accessible-astro-components'
+---
+
+<DefaultLayout title="Teacher resources" description="Educator-facing HPE teaching resources.">
+  <section class="container section">
+    <p class="eyebrow">For educators</p>
+    <Heading level="h1">Teacher resources</Heading>
+    <p>Educator-facing material will appear here. It remains public, but is clearly labelled for teacher planning and facilitation.</p>
+    <p class="empty">Teacher resources will be added as the current unit material is migrated.</p>
+  </section>
+</DefaultLayout>
+
+<style>
+  .section { padding-block: clamp(3rem, 8vw, 6rem); } .eyebrow { font-weight: 700; letter-spacing: .08em; text-transform: uppercase; } .grid { display: grid; gap: var(--space-m); grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); margin-top: var(--space-l); } .empty { border-inline-start: .35rem solid var(--color-secondary-500); margin-top: var(--space-l); padding-inline-start: var(--space-m); }
+</style>

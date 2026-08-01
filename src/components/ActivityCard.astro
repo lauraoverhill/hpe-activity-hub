@@ -1,0 +1,10 @@
+---
+interface Props { lesson: string; type: string; title: string; description: string; href: string }
+const { lesson, type, title, description, href }: Props = Astro.props
+---
+<article class="activity-card">
+  <p class="lesson">{lesson}</p><span class="type">{type}</span><h3>{title}</h3><p class="description">{description}</p><a class="open" href={href}>Open <span aria-hidden="true">→</span></a>
+</article>
+<style>
+  .activity-card { background:#fff; border:1px solid #cbd8ef; border-inline-start:4px solid #2e2f5b; border-radius:14px; box-shadow:0 8px 18px rgb(46 47 91 / 9%); display:flex; flex-direction:column; gap:.65rem; min-block-size:15rem; padding:1rem; transition:box-shadow .16s ease,transform .16s ease; } .activity-card:hover { box-shadow:0 13px 25px rgb(46 47 91 / 16%); transform:translateY(-2px); } .lesson { color:#5b5d86; font-size:.67rem; font-weight:700; letter-spacing:.08em; margin:0; text-transform:uppercase; } .type { align-self:flex-start; background:#e7edf8; border-radius:999px; color:#2e2f5b; font-size:.7rem; font-weight:700; padding:.22rem .55rem; } h3 { color:#2e2f5b; font-size:1.08rem; font-weight:800; letter-spacing:-.02em; line-height:1.2; margin:0; } .description { color:#5b5d86; font-size:.88rem; line-height:1.48; margin:0; } .open { align-self:flex-start; background:#2e2f5b; border-radius:8px; color:#fff; font-size:.84rem; font-weight:800; margin-top:auto; padding:.52rem .8rem; text-decoration:none; } .open:hover { background:#3d3e78; } .open:focus-visible { outline:3px solid #91adda; outline-offset:3px; } @media (prefers-reduced-motion:reduce) { .activity-card { transition:none; } .activity-card:hover { transform:none; } }
+</style>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spot the Influences — Year 8 Health</title>
+<style>
+  :root{
+    --navy:#2e2f5b; --blue:#91adda; --paper:#eef2f9; --card:#ffffff;
+    --ink:#2e2f5b; --muted:#5b5d86; --line:#d6deee;
+    --ok:#1f7a52; --ok-bg:#e2f3ea; --bad:#a3243c; --bad-bg:#f7dde2;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--paper); color:var(--ink);
+    font-family:'Helvetica Neue',Arial,sans-serif; padding:24px 16px 60px; line-height:1.55;}
+  .wrap{max-width:660px; margin:0 auto;}
+  .topbar{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:16px;}
+  .eyebrow{font-size:11px; letter-spacing:.16em; text-transform:uppercase; font-weight:700; color:var(--navy);}
+  .spacer{flex:1;}
+  .prog{font-size:12px; font-weight:700; color:var(--navy); background:#fff; border:1px solid var(--line); padding:5px 11px; border-radius:999px;}
+  .iconbtn{border:1px solid var(--line); background:#fff; color:var(--navy); font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:999px; cursor:pointer;}
+  .iconbtn:hover{background:#f2f6fc;} .iconbtn:focus-visible{outline:3px solid var(--navy); outline-offset:2px;}
+  .iconbtn[aria-pressed="true"]{background:var(--navy); color:#fff; border-color:var(--navy);}
+
+  h1{font-family:Georgia,serif; font-size:26px; margin:0 0 4px;}
+  h1 .hl{background:var(--blue); color:var(--navy); padding:0 .12em; border-radius:6px;}
+  .lead{font-size:14px; color:var(--muted); margin:0 0 16px;}
+
+  .card{background:#fff; border:1px solid var(--line); border-radius:16px; padding:22px 22px 20px;
+    box-shadow:0 10px 30px -22px rgba(46,47,91,.5); position:relative; overflow:hidden;}
+  .card::before{content:""; position:absolute; left:0; top:0; bottom:0; width:6px; background:var(--blue);}
+  .sc-title{font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:var(--blue); margin-bottom:8px;}
+  .scenario{font-family:Georgia,serif; font-size:17px; line-height:1.6; margin:0 0 18px;}
+  .ask{font-size:14px; font-weight:700; color:var(--navy); margin:0 0 10px;}
+
+  .opts{display:flex; gap:10px; flex-wrap:wrap;}
+  .opt{border:1.5px solid var(--line); background:#fff; color:var(--navy); font-weight:700; font-size:14px;
+    padding:10px 18px; border-radius:10px; cursor:pointer; font-family:inherit; transition:border-color .12s, background .12s;}
+  .opt:hover{border-color:var(--navy);}
+  .opt[aria-pressed="true"]{background:#eef3fb; border-color:var(--navy); box-shadow:0 0 0 3px rgba(46,47,91,.12);}
+  .opt:focus-visible{outline:3px solid var(--navy); outline-offset:2px;}
+  .opt.correct{background:var(--ok-bg); border-color:var(--ok); color:var(--ok); box-shadow:none;}
+  .opt.correct::after{content:" ✓";}
+  .opt.missed{border-style:dashed; border-color:var(--ok); color:var(--ok);}
+  .opt.wrong{background:var(--bad-bg); border-color:var(--bad); color:var(--bad); box-shadow:none;}
+  .opt.wrong::after{content:" ✗";}
+
+  .fb{margin-top:16px; display:none;}
+  .fb.show{display:block;}
+  .fbline{font-size:13.5px; padding:9px 12px; border-radius:8px; margin-bottom:7px;}
+  .fbline.ok{background:var(--ok-bg); color:var(--ok);}
+  .fbline.note{background:#f2f6fc; color:var(--muted);}
+
+  .nav{display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;}
+  .btn{border:0; border-radius:11px; padding:11px 18px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit;}
+  .btn:focus-visible{outline:3px solid var(--navy); outline-offset:2px;}
+  .btn-primary{background:var(--navy); color:#fff;} .btn-primary:hover{background:#3d3e78;}
+  .btn-ghost{background:#fff; color:var(--navy); border:1.5px solid var(--line);} .btn-ghost:hover{background:#f2f6fc;}
+  .btn:disabled{opacity:.4; cursor:not-allowed;}
+  footer{text-align:center; font-size:11.5px; color:#9aa4cd; margin-top:22px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <span class="eyebrow">Year 8 Health · Lesson 4</span>
+    <span class="spacer"></span>
+    <button class="iconbtn" id="readBtn" aria-pressed="false">🔊 Read aloud</button>
+    <span class="prog" id="prog">Scenario 1 of 3</span>
+  </div>
+
+  <h1>Spot the <span class="hl">Influences</span></h1>
+  <p class="lead">Read each scenario, then tick every influence you can spot. Some have more than one — and not every type appears every time.</p>
+
+  <div class="card" id="card"></div>
+</div>
+
+<script>
+const CATS=["Social","Emotional","Environmental"];
+const SCENARIOS=[
+  { title:"Model: Escaping Stress",
+    text:"Kai has had a rough week — piles of assignments and a fight with a mate. At a party, someone offers Kai a drink and says it will help him relax. There are no adults around, and the drinks are sitting right there on the bench.",
+    correct:["Social","Emotional","Environmental"],
+    why:{ Social:"Someone offering Kai a drink is social pressure from another person.",
+          Emotional:"Kai is stressed and wants to relax — that's an emotional influence.",
+          Environmental:"No adults around, with drinks within easy reach, is the environment." } },
+  { title:"Fitting In",
+    text:"Sam just started at a new school and really wants to make friends. A group Sam would love to join all vape at lunch. No one asks Sam to join in, but Sam feels like the only way to fit in is to do the same.",
+    correct:["Social","Emotional"],
+    why:{ Social:"Wanting to join a particular group is a social influence.",
+          Emotional:"Wanting to belong and not feel left out is an emotional influence." },
+    note:{ Environmental:"There isn't a strong setting or access factor here — it's mostly about people and feelings." } },
+  { title:"Your Turn",
+    text:"Ari is home alone and bored. Ari's parents keep their medicines in an unlocked cupboard. Online, Ari keeps seeing videos of people trying risky challenges for likes.",
+    correct:["Emotional","Environmental"],
+    why:{ Emotional:"Being bored is an emotional influence.",
+          Environmental:"An unlocked medicine cupboard and risky videos online are both part of Ari's environment." },
+    note:{ Social:"No other people are pressuring Ari here, so this one is more about feelings and surroundings." } }
+];
+
+let idx=0, selected=new Set(), checked=false;
+const card=document.getElementById('card'), prog=document.getElementById('prog'), readBtn=document.getElementById('readBtn');
+
+function render(){
+  const sc=SCENARIOS[idx]; selected=new Set(); checked=false;
+  prog.textContent=`Scenario ${idx+1} of ${SCENARIOS.length}`;
+  stopSpeaking();
+  const opts=CATS.map(c=>`<button class="opt" data-cat="${c}" aria-pressed="false">${c}</button>`).join('');
+  card.innerHTML=`
+    <div class="sc-title">${sc.title}</div>
+    <p class="scenario">${sc.text}</p>
+    <p class="ask">Which influences can you spot? Tick all that apply.</p>
+    <div class="opts">${opts}</div>
+    <div class="fb" id="fb"></div>
+    <div class="nav">
+      <button class="btn btn-primary" id="check">Check my answer</button>
+      <button class="btn btn-ghost" id="next" ${idx<SCENARIOS.length-1?'':'data-restart="1"'}>${idx<SCENARIOS.length-1?'Next scenario →':'↺ Start over'}</button>
+    </div>`;
+  card.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>toggle(b)));
+  document.getElementById('check').addEventListener('click',check);
+  const nextBtn=document.getElementById('next'); nextBtn.disabled = idx<SCENARIOS.length-1 && true;
+  nextBtn.addEventListener('click',()=>{ if(nextBtn.dataset.restart){idx=0;} else {idx++;} render(); });
+}
+function toggle(b){
+  if(checked)return;
+  const c=b.dataset.cat;
+  if(selected.has(c)){selected.delete(c); b.setAttribute('aria-pressed','false');}
+  else{selected.add(c); b.setAttribute('aria-pressed','true');}
+}
+function check(){
+  if(checked)return; checked=true;
+  const sc=SCENARIOS[idx];
+  card.querySelectorAll('.opt').forEach(b=>{
+    const c=b.dataset.cat, isCorrect=sc.correct.includes(c), picked=selected.has(c);
+    b.setAttribute('aria-pressed','false');
+    if(isCorrect && picked) b.classList.add('correct');
+    else if(isCorrect && !picked) b.classList.add('missed');
+    else if(!isCorrect && picked) b.classList.add('wrong');
+  });
+  const fb=document.getElementById('fb'); fb.classList.add('show'); let html='';
+  sc.correct.forEach(c=> html+=`<div class="fbline ok"><b>${c}:</b> ${sc.why[c]}</div>`);
+  // notes for wrongly ticked categories
+  selected.forEach(c=>{ if(!sc.correct.includes(c) && sc.note && sc.note[c]) html+=`<div class="fbline note"><b>${c}:</b> ${sc.note[c]}</div>`; });
+  fb.innerHTML=html;
+  document.getElementById('check').disabled=true;
+  document.getElementById('next').disabled=false;
+}
+
+// read aloud
+function speakText(){
+  const sc=SCENARIOS[idx];
+  return (sc.title+'. '+sc.text+' Which influences can you spot? The options are: Social, Emotional, Environmental.')
+    .replace(/[’]/g,"'");
+}
+let speaking=false;
+function speak(){ if(!('speechSynthesis'in window))return; stopSpeaking();
+  const u=new SpeechSynthesisUtterance(speakText()); u.rate=.95;
+  u.onend=()=>{speaking=false; readBtn.setAttribute('aria-pressed','false');};
+  speechSynthesis.speak(u); speaking=true; readBtn.setAttribute('aria-pressed','true'); }
+function stopSpeaking(){ if('speechSynthesis'in window)speechSynthesis.cancel(); speaking=false; readBtn.setAttribute('aria-pressed','false'); }
+readBtn.addEventListener('click',()=> speaking?stopSpeaking():speak());
+if(!('speechSynthesis'in window)) readBtn.style.display='none';
+
+render();
+</script>
+
+<!-- Printable worksheet / Save as PDF (self-contained, no libraries) -->
+<script>
+(function(){
+if(typeof window==='undefined')return;
+function buildBody(){
+  var cats=(typeof CATS!=='undefined')?CATS:[]; var sc=(typeof SCENARIOS!=='undefined')?SCENARIOS:[];
+  var boxes=cats.map(function(c){return '<span class="opt-box"><span class="box sq"></span>'+esc(c)+'</span>';}).join('');
+  var list=sc.map(function(s){return '<li><div class="sc-title"><b>'+esc(s.title)+'</b></div><div class="sc-text">'+esc(s.text)+'</div><div class="ws-opts">Tick every influence you can spot: '+boxes+'</div></li>';}).join('');
+  var rows=sc.map(function(s){var w=s.why||{};var why=Object.keys(w).map(function(k){return '<b>'+esc(k)+':</b> '+esc(w[k]);}).join('<br>');return '<tr><td>'+esc(s.title)+'</td><td><b>'+esc((s.correct||[]).join(', '))+'</b></td><td>'+why+'</td></tr>';}).join('');
+  var akey='<div class="ra-akey"><h3>Answer key</h3><table><tr><th>Scenario</th><th>Influences</th><th>Why</th></tr>'+rows+'</table></div>';
+  return '<p class="ws-intro"><b>Tick every influence you can spot in each scenario. Some have more than one.</b></p><ol class="ws-list">'+list+'</ol>'+akey;
+}
+var esc=function(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
+(function(){
+  if(document.querySelector('style[data-print]')) return;
+  var s=document.createElement('style'); s.setAttribute('data-print','');
+  s.textContent=
+  '.ra-print{display:none;}'+
+  '.ra-print-btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line,#d6deee);background:#fff;color:var(--navy,#2e2f5b);font-family:inherit;font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;cursor:pointer;margin-left:6px;}'+
+  '.ra-print-btn:hover{background:#f2f6fc;}'+
+  '.ra-print-btn:focus-visible{outline:3px solid var(--navy,#2e2f5b);outline-offset:2px;}'+
+  '@media print{'+
+    '@page{margin:14mm;}'+
+    'html,body{background:#fff !important;}'+
+    'body>*:not(.ra-print){display:none !important;}'+
+    '.ra-print{display:block !important;color:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact;font:12pt/1.45 Georgia,"Times New Roman",serif;}'+
+    '.ra-print .ws-title{font-size:19pt;margin:0 0 3mm;}'+
+    '.ra-print .ws-meta{font-size:10.5pt;margin:0 0 4mm;border-bottom:1px solid #000;padding-bottom:2.5mm;}'+
+    '.ra-print .ws-intro{font-size:11pt;margin:0 0 4mm;}'+
+    '.ra-print ol.ws-list{margin:0;padding-left:7mm;}'+
+    '.ra-print ol.ws-list>li{margin:0 0 5mm;page-break-inside:avoid;break-inside:avoid;}'+
+    '.ra-print .ws-opts{margin-top:1.5mm;}'+
+    '.ra-print .opt-box{display:inline-block;margin:0 8mm 1mm 0;font-size:11pt;}'+
+    '.ra-print .box{display:inline-block;width:4mm;height:4mm;border:1.4px solid #000;margin-right:2mm;vertical-align:-1px;border-radius:50%;}'+
+    '.ra-print .box.sq{border-radius:1px;}'+
+    '.ra-print .opt-line{margin:1.5mm 0;}'+
+    '.ra-print .fact{font-style:italic;margin:1mm 0 1.5mm;}'+
+    '.ra-print .src{font-size:10.5pt;}'+
+    '.ra-print .ws-line{border-bottom:1px solid #000;height:8mm;margin:0 0 1mm;}'+
+    '.ra-print .msgbox,.ra-print .wordbank{border:1px solid #000;padding:3mm;margin:0 0 4mm;font-size:11pt;page-break-inside:avoid;break-inside:avoid;}'+
+    '.ra-print .wordbank ul{margin:1mm 0 2mm;padding-left:6mm;}'+
+    '.ra-print .ws-graph{margin:0 0 4mm;page-break-inside:avoid;break-inside:avoid;}'+
+    '.ra-print .ws-graph svg{max-width:150mm;height:auto;}'+
+    '.ra-print .matchwrap{display:flex;gap:8mm;}'+
+    '.ra-print .matchwrap .mcol{flex:1;}'+
+    '.ra-print .matchwrap ol{padding-left:7mm;}'+
+    '.ra-print .matchwrap li{margin:0 0 3mm;page-break-inside:avoid;}'+
+    '.ra-print .sc-title{margin:0 0 1mm;}'+
+    '.ra-print .sc-text{margin:0 0 1.5mm;}'+
+    '.ra-print .ra-akey{page-break-before:always;break-before:page;}'+
+    '.ra-print .ra-akey h3{font-size:14pt;border-top:2px solid #000;padding-top:3mm;margin:0 0 3mm;}'+
+    '.ra-print .ra-akey table{border-collapse:collapse;width:100%;font-size:10.5pt;}'+
+    '.ra-print .ra-akey td,.ra-print .ra-akey th{border:1px solid #000;padding:2mm 3mm;text-align:left;vertical-align:top;}'+
+    '.ra-print .ra-akey ul{margin:0;padding-left:6mm;}'+
+  '}';
+  document.head.appendChild(s);
+})();
+var host=document.querySelector('.readrow')||document.querySelector('.bar')||document.querySelector('.toolbar')||document.querySelector('.controls');
+if(!host){host=document.createElement('div');host.className='readrow';var a=document.querySelector('.intro,.lead,h1');if(a&&a.parentNode){a.parentNode.insertBefore(host,a.nextSibling);}else{document.body.appendChild(host);}}
+var btn=document.createElement('button');btn.type='button';btn.className='ra-print-btn';btn.textContent='\uD83D\uDDA8\uFE0F Print / Save PDF';host.appendChild(btn);
+var sheet=document.createElement('div');sheet.className='ra-print';document.body.appendChild(sheet);
+var title=((document.querySelector('h1')||{}).textContent||'Worksheet').trim();
+var introRaw=((document.querySelector('.intro,.lead')||{}).textContent||'').trim();
+var intro=(/\b(tap|click|drag|drop|turns? green|lock in)\b/i.test(introRaw))?'':introRaw;
+function wordCheck(){var el=document.querySelector('.defs');if(!el)return '';var defs=el.querySelectorAll('.def');if(defs.length){var items=Array.prototype.map.call(defs,function(dd){var b=dd.querySelector('b');var term=b?b.textContent.trim():'';var rest=(dd.textContent||'').trim();if(term&&rest.indexOf(term)===0)rest=rest.slice(term.length).trim();return '<li><b>'+esc(term)+'</b> \u2014 '+esc(rest)+'</li>';}).join('');return '<div class="wordbank"><b>Word check</b><ul>'+items+'</ul></div>';}return '<div class="wordbank"><b>Word check</b><div>'+esc(el.textContent.trim())+'</div></div>';}
+function render(body){sheet.innerHTML='<h2 class="ws-title">'+esc(title)+'</h2>'+'<div class="ws-meta">Name: _____________________________    Class: ____________    Date: ____________</div>'+(intro?'<p class="ws-intro">'+esc(intro)+'</p>':'')+wordCheck()+body;}
+btn.addEventListener('click',function(){try{render(buildBody());}catch(e){render('<p>Could not build the worksheet.</p>');}window.print();});
+})();
+</script>
+</body>
+</html>

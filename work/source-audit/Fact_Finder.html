@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fact Finder — Year 8 Health</title>
+<style>
+  :root{
+    --navy:#2e2f5b; --blue:#91adda; --paper:#eef2f9; --card:#ffffff;
+    --ink:#2e2f5b; --muted:#5b5d86; --line:#d6deee;
+    --ok:#1f7a52; --ok-bg:#e2f3ea; --bad:#a3243c; --bad-bg:#f7dde2; --warn:#c1521a; --warn-bg:#fbe9dc;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--paper); color:var(--ink);
+    font-family:'Helvetica Neue',Arial,sans-serif; padding:24px 16px 60px; line-height:1.5;}
+  .wrap{max-width:680px; margin:0 auto;}
+  .eyebrow{font-size:11px; letter-spacing:.16em; text-transform:uppercase; font-weight:700; color:var(--navy);}
+  h1{font-family:Georgia,serif; font-size:26px; margin:4px 0 6px;}
+  h1 .hl{background:var(--blue); color:var(--navy); padding:0 .12em; border-radius:6px;}
+  .intro{font-size:14.5px; color:var(--muted); margin:0 0 8px; max-width:62ch;}
+  .tip{font-size:13px; color:var(--muted); background:#fff; border:1px solid var(--line); border-left:4px solid var(--blue); border-radius:8px; padding:9px 12px; margin:0 0 18px;}
+  .tip b{color:var(--navy);}
+  .bar{display:flex; align-items:center; gap:10px; margin-bottom:14px;}
+  .count{font-size:12.5px; font-weight:700; color:var(--navy); background:#fff; border:1px solid var(--line); padding:6px 12px; border-radius:999px;}
+  .btn{border:1.5px solid var(--line); background:#fff; color:var(--navy); font-weight:700; font-size:13px; padding:8px 14px; border-radius:999px; cursor:pointer; font-family:inherit;}
+  .btn:hover{background:#f2f6fc;}
+  .item{background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px; margin-bottom:16px;}
+  .src{font-size:11px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; color:var(--blue); margin-bottom:6px;}
+  .fact{font-family:Georgia,serif; font-size:16px; font-style:italic; background:#f2f6fc; border-radius:8px; padding:12px 14px; margin:0 0 14px;}
+  .ask{font-size:13.5px; font-weight:700; color:var(--navy); margin:0 0 10px;}
+  .opt{display:block; width:100%; text-align:left; background:#fff; border:1.5px solid var(--line); border-radius:11px;
+    padding:12px 14px; font-size:14px; color:var(--ink); cursor:pointer; font-family:inherit; margin-bottom:9px;}
+  .opt:hover{border-color:var(--navy); background:#f7f9fd;}
+  .opt:focus-visible{outline:3px solid var(--navy); outline-offset:2px;}
+  .item.done .opt{cursor:default;} .item.done .opt:hover{background:#fff;}
+  .opt.best{background:var(--ok-bg); border-color:var(--ok);}
+  .opt.copy{background:var(--warn-bg); border-color:var(--warn);}
+  .opt.wrong{background:var(--bad-bg); border-color:var(--bad);}
+  .tag{display:none; font-size:12px; font-weight:700; margin-top:6px;}
+  .item.done .tag{display:block;}
+  .tag.best{color:var(--ok);} .tag.copy{color:var(--warn);} .tag.wrong{color:var(--bad);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Year 8 Health · Lesson 13</div>
+  <h1>Fact <span class="hl">Finder</span></h1>
+  <p class="intro">Good research means finding a fact from a trusted source and writing it <b>in your own words</b> — without copying, and without changing what it means.</p>
+  <p class="tip"><b>Trusted sources:</b> the Alcohol and Drug Foundation (ADF), Health Direct, and NPS MedicineWise are all reliable places to find drug and medicine facts.</p>
+
+  <div class="bar"><span class="count" id="count">Best answers: 0 / 4</span><button class="btn" id="reset">Reset</button></div>
+  <div id="list"></div>
+</div>
+
+<script>
+const ITEMS=[
+  { src:"Health Direct",
+    fact:"Opioids are a class of drugs that slow the central nervous system and are often used to treat pain.",
+    options:[
+      {text:"Opioids slow down the body's nervous system and are often used to help with pain.", type:"best", fb:"Accurate, clear, and in your own words. This is the goal."},
+      {text:"Opioids are a class of drugs that slow the central nervous system and are often used to treat pain.", type:"copy", fb:"This is copied word-for-word — not in your own words."},
+      {text:"Opioids speed up the nervous system and give people energy.", type:"wrong", fb:"This changes the meaning — opioids slow the body down."}
+    ]},
+  { src:"Alcohol and Drug Foundation",
+    fact:"Dependence is when a person's body or mind starts to feel like it needs a drug to function normally.",
+    options:[
+      {text:"Dependence is when a person's body or mind starts to feel like it needs a drug to function normally.", type:"copy", fb:"Copied exactly — reword it in your own way."},
+      {text:"Dependence is when your body or mind feels like it needs a drug just to feel normal.", type:"best", fb:"Same meaning, simpler words, clearly your own. Nice."},
+      {text:"Dependence means a person has completely stopped using a drug.", type:"wrong", fb:"This is the opposite of what dependence means."}
+    ]},
+  { src:"Alcohol and Drug Foundation",
+    fact:"Mixing depressant drugs, such as alcohol and benzodiazepines, increases the risk of harm because their effects add together.",
+    options:[
+      {text:"Mixing depressants like alcohol and benzos is safe because their effects cancel out.", type:"wrong", fb:"This changes the meaning — mixing them is more dangerous, not safe."},
+      {text:"Mixing depressant drugs, such as alcohol and benzodiazepines, increases the risk of harm because their effects add together.", type:"copy", fb:"Word-for-word copy — put it in your own words."},
+      {text:"Taking two depressants together, like alcohol and benzos, is more dangerous because their effects stack up.", type:"best", fb:"Accurate and reworded — well done."}
+    ]},
+  { src:"NPS MedicineWise",
+    fact:"Pharmacists can give advice about medicines and how to take them safely.",
+    options:[
+      {text:"Pharmacists can help you understand your medicine and how to take it safely.", type:"best", fb:"Clear, correct, and in your own words."},
+      {text:"Pharmacists only sell medicines and can't give any advice.", type:"wrong", fb:"This changes the meaning — pharmacists are there to give advice."},
+      {text:"Pharmacists can give advice about medicines and how to take them safely.", type:"copy", fb:"This is the original, copied exactly."}
+    ]}
+];
+const TOTAL=ITEMS.length;
+let best=0;
+const list=document.getElementById('list'), countEl=document.getElementById('count');
+const LABEL={best:"✓ Best — in your own words",copy:"⚠ Too close to the original",wrong:"✗ Changes the meaning"};
+
+function build(){
+  best=0; countEl.textContent=`Best answers: 0 / ${TOTAL}`; list.innerHTML='';
+  ITEMS.forEach((it)=>{
+    const card=document.createElement('div'); card.className='item';
+    const order=it.options.map((o,i)=>i); // keep given order (already varied)
+    const opts=order.map(i=>{const o=it.options[i];
+      return `<button class="opt" data-type="${o.type}"><span>${o.text}</span><span class="tag ${o.type}"></span></button>`;}).join('');
+    card.innerHTML=`<div class="src">From: ${it.src}</div><p class="fact">"${it.fact}"</p>
+      <p class="ask">Which is the best way to say it in your own words?</p>${opts}`;
+    card.querySelectorAll('.opt').forEach((btn,i)=>btn.addEventListener('click',()=>pick(card,it,btn,order[i])));
+    list.appendChild(card);
+  });
+}
+function pick(card,it,btn,optIdx){
+  if(card.classList.contains('done'))return;
+  card.classList.add('done');
+  card.querySelectorAll('.opt').forEach(b=>{
+    const t=b.dataset.type; b.classList.add(t);
+    const tag=b.querySelector('.tag'); tag.textContent=LABEL[t];
+  });
+  const chosen=it.options[optIdx];
+  if(chosen.type==='best'){ best++; countEl.textContent=`Best answers: ${best} / ${TOTAL}`; }
+}
+document.getElementById('reset').addEventListener('click',build);
+build();
+</script>
+
+<!-- Read aloud (accessibility support; self-contained, no libraries, no data collected) -->
+<script>
+(function(){
+  if(!('speechSynthesis' in window)) return;            // unsupported: add nothing
+  var wrap = document.querySelector('.wrap') || document.body;
+  var h1 = wrap.querySelector('h1');
+  if(!h1) return;
+
+  // Button styling (uses the page's palette tokens, with safe fallbacks)
+  if(!document.querySelector('style[data-readaloud]')){
+    var st = document.createElement('style');
+    st.setAttribute('data-readaloud','');
+    st.textContent =
+      '.readrow{margin:10px 0 16px;}'+
+      '.ra-btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line,#d6deee);'+
+      'background:#fff;color:var(--navy,#2e2f5b);font-family:inherit;font-size:13px;font-weight:600;'+
+      'padding:8px 14px;border-radius:999px;cursor:pointer;}'+
+      '.ra-btn:hover{background:#f2f6fc;}'+
+      '.ra-btn:focus-visible{outline:3px solid var(--navy,#2e2f5b);outline-offset:2px;}'+
+      '.ra-btn[aria-pressed="true"]{background:var(--navy,#2e2f5b);color:#fff;border-color:var(--navy,#2e2f5b);}';
+    document.head.appendChild(st);
+  }
+
+  // Build the button and place it after the intro (or the heading if there is none)
+  var row = document.createElement('div'); row.className='readrow';
+  var btn = document.createElement('button');
+  btn.type='button'; btn.className='ra-btn'; btn.setAttribute('aria-pressed','false');
+  btn.setAttribute('aria-label','Read this activity aloud');
+  btn.textContent='🔊 Read aloud';
+  row.appendChild(btn);
+  var anchor = wrap.querySelector('.intro, .lead, .sub') || h1;
+  anchor.parentNode.insertBefore(row, anchor.nextSibling);
+
+  // Collect the visible, readable text from the live page (skips controls + chrome + hidden bits)
+  var SKIP='button,.btn,.opt,.iconbtn,.ra-btn,select,option,input,textarea,.eyebrow,.prog,.progress,.count,.score,footer,.readrow';
+  function readable(){
+    var parts=[], walker=document.createTreeWalker(wrap, NodeFilter.SHOW_TEXT, {
+      acceptNode:function(n){
+        if(!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+        var p=n.parentElement; if(!p) return NodeFilter.FILTER_REJECT;
+        if(p.closest(SKIP)) return NodeFilter.FILTER_REJECT;
+        var s=window.getComputedStyle(p);
+        if(s.display==='none'||s.visibility==='hidden'||parseFloat(s.opacity)===0) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    var n; while(n=walker.nextNode()){ parts.push(n.nodeValue.trim()); }
+    return parts.join(' ').replace(/\s+/g,' ').replace(/[\u2019]/g,"'").trim();
+  }
+
+  var speaking=false;
+  function stop(){ try{speechSynthesis.cancel();}catch(e){} speaking=false; btn.setAttribute('aria-pressed','false'); }
+  function start(){
+    stop();
+    var text=readable(); if(!text) return;
+    var u=new SpeechSynthesisUtterance(text); u.rate=0.95;
+    u.onend=function(){ speaking=false; btn.setAttribute('aria-pressed','false'); };
+    u.onerror=function(){ speaking=false; btn.setAttribute('aria-pressed','false'); };
+    speechSynthesis.speak(u); speaking=true; btn.setAttribute('aria-pressed','true');
+  }
+  btn.addEventListener('click', function(){ speaking?stop():start(); });
+  document.addEventListener('visibilitychange', function(){ if(document.hidden) stop(); });
+  window.addEventListener('pagehide', stop);
+})();
+</script>
+
+<!-- Printable worksheet / Save as PDF (self-contained, no libraries) -->
+<script>
+(function(){
+if(typeof window==='undefined')return;
+function buildBody(){
+  var items=(typeof ITEMS!=='undefined')?ITEMS:[]; var L=['A','B','C','D','E'];
+  var list=items.map(function(it){
+    var opts=it.options.map(function(o,j){return '<div class="opt-line"><span class="box"></span> <b>'+L[j]+'.</b> '+esc(o.text)+'</div>';}).join('');
+    return '<li><div class="src">From <b>'+esc(it.src)+'</b>:</div><div class="fact">\u201C'+esc(it.fact)+'\u201D</div><div class="ws-opts">Circle the best paraphrase (accurate and in your own words):'+opts+'</div></li>';
+  }).join('');
+  var rows=items.map(function(it,i){var bi=-1;it.options.forEach(function(o,j){if(o.type==='best')bi=j;});return '<tr><td>'+(i+1)+'</td><td><b>'+L[bi]+'</b></td><td>'+esc(it.options[bi].fb)+'</td></tr>';}).join('');
+  var akey='<div class="ra-akey"><h3>Answer key</h3><table><tr><th>#</th><th>Best</th><th>Why</th></tr>'+rows+'</table></div>';
+  return '<ol class="ws-list">'+list+'</ol>'+akey;
+}
+var esc=function(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
+(function(){
+  if(document.querySelector('style[data-print]')) return;
+  var s=document.createElement('style'); s.setAttribute('data-print','');
+  s.textContent=
+  '.ra-print{display:none;}'+
+  '.ra-print-btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line,#d6deee);background:#fff;color:var(--navy,#2e2f5b);font-family:inherit;font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;cursor:pointer;margin-left:6px;}'+
+  '.ra-print-btn:hover{background:#f2f6fc;}'+
+  '.ra-print-btn:focus-visible{outline:3px solid var(--navy,#2e2f5b);outline-offset:2px;}'+
+  '@media print{'+
+    '@page{margin:14mm;}'+
+    'html,body{background:#fff !important;}'+
+    'body>*:not(.ra-print){display:none !important;}'+
+    '.ra-print{display:block !important;color:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact;font:12pt/1.45 Georgia,"Times New Roman",serif;}'+
+    '.ra-print .ws-title{font-size:19pt;margin:0 0 3mm;}'+
+    '.ra-print .ws-meta{font-size:10.5pt;margin:0 0 4mm;border-bottom:1px solid #000;padding-bottom:2.5mm;}'+
+    '.ra-print .ws-intro{font-size:11pt;margin:0 0 4mm;}'+
+    '.ra-print ol.ws-list{margin:0;padding-left:7mm;}'+
+    '.ra-print ol.ws-list>li{margin:0 0 5mm;page-break-inside:avoid;break-inside:avoid;}'+
+    '.ra-print .ws-opts{margin-top:1.5mm;}'+
+    '.ra-print .opt-box{display:inline-block;margin:0 8mm 1mm 0;font-size:11pt;}'+
+    '.ra-print .box{display:inline-block;width:4mm;height:4mm;border:1.4px solid #000;margin-right:2mm;vertical-align:-1px;border-radius:50%;}'+
+    '.ra-print .box.sq{border-radius:1px;}'+
+    '.ra-print .opt-line{margin:1.5mm 0;}'+
+    '.ra-print .fact{font-style:italic;margin:1mm 0 1.5mm;}'+
+    '.ra-print .src{font-size:10.5pt;}'+
+    '.ra-print .ws-line{border-bottom:1px solid #000;height:8mm;margin:0 0 1mm;}'+
+    '.ra-print .msgbox,.ra-print .wordbank{border:1px solid #000;padding:3mm;margin:0 0 4mm;font-size:11pt;page-break-inside:avoid;break-inside:avoid;}'+
+    '.ra-print .wordbank ul{margin:1mm 0 2mm;padding-left:6mm;}'+
+    '.ra-print .ws-graph{margin:0 0 4mm;page-break-inside:avoid;break-inside:avoid;}'+
+    '.ra-print .ws-graph svg{max-width:150mm;height:auto;}'+
+    '.ra-print .matchwrap{display:flex;gap:8mm;}'+
+    '.ra-print .matchwrap .mcol{flex:1;}'+
+    '.ra-print .matchwrap ol{padding-left:7mm;}'+
+    '.ra-print .matchwrap li{margin:0 0 3mm;page-break-inside:avoid;}'+
+    '.ra-print .sc-title{margin:0 0 1mm;}'+
+    '.ra-print .sc-text{margin:0 0 1.5mm;}'+
+    '.ra-print .ra-akey{page-break-before:always;break-before:page;}'+
+    '.ra-print .ra-akey h3{font-size:14pt;border-top:2px solid #000;padding-top:3mm;margin:0 0 3mm;}'+
+    '.ra-print .ra-akey table{border-collapse:collapse;width:100%;font-size:10.5pt;}'+
+    '.ra-print .ra-akey td,.ra-print .ra-akey th{border:1px solid #000;padding:2mm 3mm;text-align:left;vertical-align:top;}'+
+    '.ra-print .ra-akey ul{margin:0;padding-left:6mm;}'+
+  '}';
+  document.head.appendChild(s);
+})();
+var host=document.querySelector('.readrow')||document.querySelector('.bar')||document.querySelector('.toolbar')||document.querySelector('.controls');
+if(!host){host=document.createElement('div');host.className='readrow';var a=document.querySelector('.intro,.lead,h1');if(a&&a.parentNode){a.parentNode.insertBefore(host,a.nextSibling);}else{document.body.appendChild(host);}}
+var btn=document.createElement('button');btn.type='button';btn.className='ra-print-btn';btn.textContent='\uD83D\uDDA8\uFE0F Print / Save PDF';host.appendChild(btn);
+var sheet=document.createElement('div');sheet.className='ra-print';document.body.appendChild(sheet);
+var title=((document.querySelector('h1')||{}).textContent||'Worksheet').trim();
+var introRaw=((document.querySelector('.intro,.lead')||{}).textContent||'').trim();
+var intro=(/\b(tap|click|drag|drop|turns? green|lock in)\b/i.test(introRaw))?'':introRaw;
+function wordCheck(){var el=document.querySelector('.defs');if(!el)return '';var defs=el.querySelectorAll('.def');if(defs.length){var items=Array.prototype.map.call(defs,function(dd){var b=dd.querySelector('b');var term=b?b.textContent.trim():'';var rest=(dd.textContent||'').trim();if(term&&rest.indexOf(term)===0)rest=rest.slice(term.length).trim();return '<li><b>'+esc(term)+'</b> \u2014 '+esc(rest)+'</li>';}).join('');return '<div class="wordbank"><b>Word check</b><ul>'+items+'</ul></div>';}return '<div class="wordbank"><b>Word check</b><div>'+esc(el.textContent.trim())+'</div></div>';}
+function render(body){sheet.innerHTML='<h2 class="ws-title">'+esc(title)+'</h2>'+'<div class="ws-meta">Name: _____________________________    Class: ____________    Date: ____________</div>'+(intro?'<p class="ws-intro">'+esc(intro)+'</p>':'')+wordCheck()+body;}
+btn.addEventListener('click',function(){try{render(buildBody());}catch(e){render('<p>Could not build the worksheet.</p>');}window.print();});
+})();
+</script>
+</body>
+</html>

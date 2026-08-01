@@ -1,0 +1,17 @@
+---
+import DefaultLayout from '@layouts/DefaultLayout.astro'
+import HubCard from '@components/HubCard.astro'
+import { Heading } from 'accessible-astro-components'
+---
+
+<DefaultLayout title="Units" description="HPE units and their associated teaching and learning materials.">
+  <section class="container section">
+    <Heading level="h1">Units</Heading>
+    <p>Units bring learner activities and teacher resources together around a shared HPE topic.</p>
+    <div class="grid"><HubCard title="Illicit Drugs" description="Year 8 unit on party safety, dependence and prescription medicine — sorters, scenarios and quizzes." href="/units/illicit-drugs" label="Year 8 · 15 lessons" /></div>
+  </section>
+</DefaultLayout>
+
+<style>
+  .section { padding-block: clamp(3rem, 8vw, 6rem); } .grid { display: grid; gap: var(--space-m); grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); margin-top: var(--space-l); } .empty { border-inline-start: .35rem solid var(--color-secondary-500); margin-top: var(--space-l); padding-inline-start: var(--space-m); }
+</style>

@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brain Break Spinner</title>
+<style>
+  :root{
+    --navy:#2e2f5b; --blue:#91adda; --white:#ffffff; --paper:#eef2f9;
+    --ink:#2e2f5b; --muted:#5b5d86; --line:#d6deee; --accent-hi:#3d3e78;
+    /* functional mode colours (from the skill's table) */
+    --energise:#c1521a; --energise-bg:#f7e7dd;
+    --calm:#2e6db4;     --calm-bg:#e0ecf7;
+    /* the active mode fills these */
+    --mode:var(--navy); --mode-bg:var(--paper);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    color:var(--ink);
+    background:var(--paper);
+    line-height:1.4;
+    min-height:100vh;
+  }
+  body.mode-energising{--mode:var(--energise);--mode-bg:var(--energise-bg);}
+  body.mode-calming{--mode:var(--calm);--mode-bg:var(--calm-bg);}
+
+  .wrap{max-width:760px;margin:0 auto;padding:26px 18px 60px;}
+
+  h1,h2,h3,.serif{font-family:Georgia,'Iowan Old Style',serif;}
+  h1{font-size:30px;margin:0 0 4px;color:var(--navy);letter-spacing:-.3px;}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 22px;}
+  .swipe{background:var(--blue);color:var(--navy);padding:0 .14em;border-radius:6px;}
+
+  .card{
+    background:var(--white);border:1px solid var(--line);border-radius:16px;
+    box-shadow:0 6px 20px rgba(46,47,91,.08);
+    padding:22px;position:relative;overflow:hidden;
+  }
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--mode);}
+
+  .hidden{display:none !important;}
+
+  /* Buttons */
+  button{font-family:inherit;cursor:pointer;}
+  .btn{
+    background:var(--navy);color:#fff;border:none;border-radius:10px;
+    padding:12px 20px;font-size:15px;font-weight:700;
+  }
+  .btn:hover{background:var(--accent-hi);}
+  .btn.mode{background:var(--mode);}
+  .btn.mode:hover{filter:brightness(.92);}
+  .btn.ghost{background:#fff;color:var(--navy);border:1.5px solid var(--line);}
+  .btn.ghost:hover{background:var(--paper);}
+  .btn.small{padding:8px 14px;font-size:13px;}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  a.link{color:var(--navy);font-weight:700;text-decoration:underline;cursor:pointer;background:none;border:none;font-size:14px;font-family:inherit;}
+  button:focus-visible,a.link:focus-visible,.choice:focus-visible{outline:3px solid var(--navy);outline-offset:2px;}
+
+  /* Choose screen */
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:6px;}
+  .choice{
+    text-align:left;background:var(--white);border:1px solid var(--line);
+    border-radius:16px;padding:22px 20px;position:relative;overflow:hidden;
+    box-shadow:0 6px 20px rgba(46,47,91,.08);
+  }
+  .choice::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;}
+  .choice.energise::before{background:var(--energise);}
+  .choice.calm::before{background:var(--calm);}
+  .choice:hover{transform:translateY(-2px);transition:transform .15s;}
+  .choice .ico{width:42px;height:42px;margin-bottom:12px;display:block;}
+  .choice h2{font-size:22px;margin:0 0 4px;}
+  .choice .energise-t{color:var(--energise);}
+  .choice .calm-t{color:var(--calm);}
+  .choice p{margin:0;font-size:13.5px;color:var(--muted);}
+
+  /* Wheel */
+  .wheel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+  .chip{display:inline-block;background:var(--mode-bg);color:var(--mode);font-weight:800;
+    font-size:12px;letter-spacing:.6px;text-transform:uppercase;padding:5px 12px;border-radius:20px;}
+  .wheel-stage{position:relative;width:320px;max-width:86vw;margin:6px auto 4px;}
+  .pointer{position:absolute;top:-6px;left:50%;transform:translateX(-50%);
+    width:0;height:0;border-left:15px solid transparent;border-right:15px solid transparent;
+    border-top:24px solid var(--navy);z-index:3;filter:drop-shadow(0 2px 2px rgba(0,0,0,.2));}
+  .wheel-hub{position:absolute;top:50%;left:50%;width:46px;height:46px;margin:-23px 0 0 -23px;
+    background:#fff;border:3px solid var(--navy);border-radius:50%;z-index:2;}
+  svg.wheel{display:block;width:100%;height:auto;transform:rotate(0deg);}
+  svg.wheel.spin{transition:transform 4.2s cubic-bezier(.15,.62,.14,1);}
+  .spin-row{text-align:center;margin-top:16px;}
+  .spin-row .btn{font-size:17px;padding:14px 34px;}
+  .wheel-foot{text-align:center;margin-top:14px;}
+
+  /* Prompt modal */
+  .overlay{position:fixed;inset:0;background:rgba(46,47,91,.5);display:flex;
+    align-items:center;justify-content:center;padding:18px;z-index:50;}
+  .modal{background:#fff;border-radius:18px;max-width:520px;width:100%;
+    padding:26px;box-shadow:0 20px 50px rgba(46,47,91,.35);position:relative;overflow:hidden;}
+  .modal::before{content:"";position:absolute;left:0;top:0;right:0;height:6px;background:var(--mode);}
+  .modal .kicker{font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--mode);margin:6px 0 2px;}
+  .modal h2{font-size:24px;margin:0 0 14px;}
+  .prompt-box{background:var(--mode-bg);border-radius:14px;padding:20px;margin-bottom:16px;}
+  .prompt-q{font-family:Georgia,serif;font-size:22px;line-height:1.35;color:var(--navy);font-weight:700;}
+  .prompt-q .or{display:inline-block;color:var(--mode);font-weight:800;text-transform:uppercase;font-size:15px;letter-spacing:1px;margin:0 6px;font-family:'Helvetica Neue',Arial,sans-serif;}
+  .prompt-hint{font-size:13.5px;color:var(--muted);margin-top:10px;}
+  .odd-chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px;}
+  .odd-chip{background:#fff;border:2px solid var(--mode);color:var(--navy);font-weight:700;
+    font-family:Georgia,serif;font-size:18px;padding:8px 16px;border-radius:12px;}
+  .modal-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  .modal-actions .spacer{flex:1;}
+
+  /* Timer */
+  .timer-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+  .timer-name{font-family:Georgia,serif;font-size:26px;color:var(--navy);margin:0;}
+  .how{font-size:15px;color:var(--muted);margin:4px 0 16px;}
+  .live-prompt{background:var(--mode-bg);border-radius:14px;padding:16px 18px;margin-bottom:18px;}
+  .live-prompt .lp-label{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--mode);margin-bottom:6px;}
+  .live-prompt .lp-body{font-family:Georgia,serif;font-size:20px;color:var(--navy);font-weight:700;line-height:1.35;}
+  .live-prompt .or{color:var(--mode);font-weight:800;text-transform:uppercase;font-size:13px;letter-spacing:1px;margin:0 5px;font-family:'Helvetica Neue',Arial,sans-serif;}
+
+  .timer-stage{text-align:center;margin:8px 0 14px;}
+  .ring-wrap{position:relative;width:230px;max-width:70vw;margin:0 auto;}
+  .ring-wrap svg{display:block;width:100%;height:auto;transform:rotate(-90deg);}
+  .ring-bg{fill:none;stroke:var(--line);stroke-width:14;}
+  .ring-fg{fill:none;stroke:var(--mode);stroke-width:14;stroke-linecap:round;transition:stroke-dashoffset .3s linear;}
+  .ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .ring-text .big{font-family:Georgia,serif;font-size:48px;font-weight:700;color:var(--navy);line-height:1;}
+  .ring-text .state{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:6px;font-weight:700;}
+  .timesup .ring-text .big{color:var(--mode);}
+
+  .adjust{display:flex;align-items:center;justify-content:center;gap:10px;margin:4px 0 16px;}
+  .adjust .len{font-weight:700;color:var(--navy);min-width:70px;text-align:center;}
+  .timer-controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:8px;}
+  .timer-foot{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);}
+
+  .music-panel{background:var(--mode-bg);border-radius:14px;padding:16px 18px;margin-bottom:18px;}
+  .music-note{font-family:Georgia,serif;font-size:15px;font-weight:700;color:var(--navy);margin-bottom:10px;}
+  .music-hint{font-size:12.5px;color:var(--muted);margin-top:10px;}
+
+  .banner{background:var(--mode-bg);color:var(--mode);font-weight:800;text-align:center;
+    padding:10px;border-radius:12px;margin-bottom:14px;font-size:16px;}
+
+  @media (max-width:560px){
+    .choices{grid-template-columns:1fr;}
+    h1{font-size:25px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    svg.wheel.spin{transition:none;}
+    .choice:hover{transform:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Brain Break <span class="swipe">Spinner</span></h1>
+  <p class="sub">Pick the energy the room needs, spin the wheel, and run the break it lands on.</p>
+
+  <!-- ============ SCREEN 1: CHOOSE MODE ============ -->
+  <section id="screen-choose">
+    <div class="choices">
+      <button class="choice energise" data-mode="energising">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#c1521a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        <h2 class="energise-t">Energising</h2>
+        <p>Wake the room up. Good when the class is flat, sleepy or losing focus.</p>
+      </button>
+      <button class="choice calm" data-mode="calming">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#2e6db4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1.7 3 5 4.5 5 8a5 5 0 0 1-10 0c0-3.5 3.3-5 5-8z"></path><path d="M12 21v-6"></path></svg>
+        <h2 class="calm-t">Calming</h2>
+        <p>Settle the room down. Good when the class is loud, wired or overexcited.</p>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 2: WHEEL ============ -->
+  <section id="screen-wheel" class="hidden">
+    <div class="card">
+      <div class="wheel-head">
+        <span class="chip" id="mode-chip">Mode</span>
+        <button class="link" id="change-mode">&larr; Change mode</button>
+      </div>
+      <div class="wheel-stage">
+        <div class="pointer"></div>
+        <div class="wheel-hub"></div>
+        <svg class="wheel" id="wheel" viewBox="0 0 300 300" aria-hidden="true"></svg>
+      </div>
+      <div class="spin-row">
+        <button class="btn mode" id="spin-btn">Spin the wheel</button>
+      </div>
+      <div class="wheel-foot">
+        <span class="sub" style="margin:0;font-size:13px;" id="wheel-count"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 3: TIMER ============ -->
+  <section id="screen-timer" class="hidden">
+    <div class="card">
+      <div class="timer-head">
+        <span class="chip" id="timer-chip">Mode</span>
+      </div>
+      <h2 class="timer-name" id="timer-name">Break</h2>
+      <p class="how" id="timer-how"></p>
+
+      <div class="music-panel hidden" id="music-panel">
+        <div class="music-note" id="music-note"></div>
+        <iframe id="spotify-frame" title="Music player" style="border-radius:12px" width="100%" height="152"
+                frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+        <div class="music-hint">Press play on the player above. The music runs on Spotify, separate from the timer, so start it whenever you're ready.</div>
+      </div>
+
+      <div class="live-prompt hidden" id="live-prompt">
+        <div class="lp-label" id="lp-label">Prompt</div>
+        <div class="lp-body" id="lp-body"></div>
+      </div>
+
+      <div id="timesup-banner" class="banner hidden">Time's up!</div>
+
+      <div class="timer-stage" id="timer-stage">
+        <div class="ring-wrap">
+          <svg viewBox="0 0 200 200">
+            <circle class="ring-bg" cx="100" cy="100" r="88"></circle>
+            <circle class="ring-fg" id="ring-fg" cx="100" cy="100" r="88"></circle>
+          </svg>
+          <div class="ring-text">
+            <div class="big" id="time-digits">2:00</div>
+            <div class="state" id="time-state">Ready</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="adjust" id="adjust-row">
+        <button class="btn ghost small" id="minus30">&minus;30s</button>
+        <span class="len" id="len-label">2:00</span>
+        <button class="btn ghost small" id="plus30">+30s</button>
+      </div>
+
+      <div class="timer-controls">
+        <button class="btn mode" id="start-btn">Start</button>
+        <button class="btn ghost" id="reset-btn">Reset</button>
+        <button class="btn ghost small" id="read-btn">🔊 Read aloud</button>
+      </div>
+
+      <div class="timer-foot">
+        <button class="btn ghost" id="spin-again">↻ Spin again</button>
+        <button class="link" id="back-start">Back to start</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ============ PROMPT MODAL ============ -->
+<div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal">
+    <div class="kicker" id="modal-kicker">Prompt</div>
+    <h2 id="modal-title">Break</h2>
+    <div class="prompt-box" id="prompt-box" aria-live="polite"></div>
+    <div class="modal-actions">
+      <button class="btn ghost small" id="new-prompt">↻ New prompt</button>
+      <button class="btn ghost small" id="modal-read">🔊 Read aloud</button>
+      <span class="spacer"></span>
+      <button class="link" id="modal-cancel">Cancel</button>
+      <button class="btn mode" id="start-with-prompt">Start timer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   BRAIN BREAK SPINNER  —  edit the config below to change the breaks/prompts
+   Each break: { name, label (short, for the wheel), secs, how, prompt? }
+   A "prompt" key means a prompt card pops up before the timer. Its value is
+   the key of a prompt pool in PROMPTS (wyr | category | odd | gratitude).
+   ========================================================================= */
+
+const BREAKS = {
+  energising: [
+    { name:"Stand & Stretch",      label:"Stretch",        secs:60,  how:"Reach for the ceiling, roll your shoulders, then shake out both hands on a countdown." },
+    { name:"Would You Rather",     label:"Would You Rather",secs:120, how:"Two options — one on each side of the room. Vote with your feet, then defend your choice.", prompt:"wyr" },
+    { name:"Silent Ball",          label:"Silent Ball",    secs:180, how:"Toss a soft object around the room. Talk, drop it, or a bad throw and you sit down." },
+    { name:"Countdown Categories", label:"Categories",     secs:120, how:"Go around the room naming one each. Repeat an answer or stall and you're out.", prompt:"category" },
+    { name:"10-Second Shake",      label:"Shake Out",      secs:60,  how:"Shake each arm, then each leg, on a loud group countdown from ten." },
+    { name:"Odd One Out",          label:"Odd One Out",    secs:120, how:"Argue which word doesn't belong. There's more than one good answer — that's the point.", prompt:"odd" }
+  ],
+  calming: [
+    { name:"Box Breathing",        label:"Box Breathing",  secs:120, how:"Breathe in for 4, hold for 4, out for 4, hold for 4. Follow the square and repeat." },
+    { name:"5-4-3-2-1 Senses",     label:"5-4-3-2-1",      secs:120, how:"Name 5 things you can see, 4 you can hear, 3 you can touch, 2 you can smell, 1 you can taste." },
+    { name:"Draw to Music",        label:"Draw to Music",  secs:120, how:"Quiet doodling while the music plays. No talking, nothing to hand in.", spotify:"7EFMh8cJDx5MUMbtDzMHon", credit:"Music by Cameron Segal (Australian composer)" },
+    { name:"Palms & Pause",        label:"Palms & Pause",  secs:60,  how:"Eyes closed, both palms flat on the desk, take three slow breaths in and out." },
+    { name:"Slow Countdown",       label:"Slow Countdown", secs:60,  how:"Whisper-count backwards from 20 together, slower and quieter with each number." },
+    { name:"Gratitude Round",      label:"Gratitude",      secs:120, how:"Think quietly about the prompt, then share one thing with the person next to you.", prompt:"gratitude" }
+  ]
+};
+
+/* Prompt pools — add or edit freely */
+const PROMPTS = {
+  wyr: [
+    "be able to fly or be invisible",
+    "be able to talk to animals or speak every language",
+    "have super strength or super speed",
+    "have a rewind button or a pause button for your day",
+    "only ever eat pizza or only ever eat tacos",
+    "have no homework ever or a four-day school week",
+    "be the smartest in class or the funniest",
+    "be able to teleport anywhere or read minds",
+    "never lose your earphones or never run out of phone battery",
+    "sneeze glitter or burp bubbles",
+    "explore outer space or explore the deep ocean",
+    "be brave or be kind"
+  ],
+  category: [
+    "Animals","Sports","Countries","Foods you like","Fruits and vegetables",
+    "Things in a classroom","Movies","Cartoon characters","Things that are cold",
+    "Board or video games","Jobs","Things with wheels"
+  ],
+  odd: [
+    ["Apple","Banana","Carrot","Strawberry"],
+    ["Dog","Cat","Goldfish","Wolf"],
+    ["Soccer","Tennis","Chess","Netball"],
+    ["Guitar","Piano","Drums","Microphone"],
+    ["Triangle","Square","Circle","Cube"],
+    ["Red","Blue","Green","Happy"],
+    ["Bus","Bike","Car","Road"],
+    ["Sun","Moon","Star","Cloud"]
+  ],
+  gratitude: [
+    "someone who helped you this week",
+    "something you're looking forward to",
+    "a small thing that made you smile today",
+    "something you did well recently",
+    "a place where you feel relaxed",
+    "a song that lifts your mood"
+  ]
+};
+
+/* ---------------- state ---------------- */
+const REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let mode = null;
+let list = [];
+let currentBreak = null;
+let currentPrompt = null;      // rendered prompt data for the landed break
+let rotation = 0;
+let spinning = false;
+
+/* ---------------- helpers ---------------- */
+const $ = id => document.getElementById(id);
+const rand = arr => arr[Math.floor(Math.random()*arr.length)];
+function show(id){ ['screen-choose','screen-wheel','screen-timer'].forEach(s=>$(s).classList.toggle('hidden', s!==id)); }
+function fmt(s){ s=Math.max(0,Math.ceil(s)); const m=Math.floor(s/60); const r=s%60; return m+':'+String(r).padStart(2,'0'); }
+
+/* ---------------- choose mode ---------------- */
+document.querySelectorAll('.choice').forEach(b=>{
+  b.addEventListener('click',()=>{
+    mode = b.dataset.mode;
+    list = BREAKS[mode];
+    document.body.classList.remove('mode-energising','mode-calming');
+    document.body.classList.add(mode==='energising'?'mode-energising':'mode-calming');
+    const label = mode==='energising' ? 'Energising' : 'Calming';
+    $('mode-chip').textContent = label;
+    $('timer-chip').textContent = label;
+    $('wheel-count').textContent = list.length + ' breaks on the wheel — spin to pick one at random.';
+    buildWheel();
+    rotation = 0;
+    $('wheel').style.transform = 'rotate(0deg)';
+    show('screen-wheel');
+  });
+});
+$('change-mode').addEventListener('click',()=>show('screen-choose'));
+$('back-start').addEventListener('click',()=>{ stopTimer(); stopMusic(); show('screen-choose'); });
+function stopMusic(){ const f=$('spotify-frame'); if(f) f.src='about:blank'; }
+
+/* ---------------- build the wheel ---------------- */
+function buildWheel(){
+  const svg = $('wheel');
+  const N = list.length, seg = 360/N, cx=150, cy=150, r=140;
+  const modeColor = mode==='energising' ? getCSS('--energise') : getCSS('--calm');
+  let out = '';
+  for(let i=0;i<N;i++){
+    const a0 = i*seg, a1 = (i+1)*seg;
+    const p0 = pt(cx,cy,r,a0), p1 = pt(cx,cy,r,a1);
+    const fill = (i%2===0) ? modeColor : '#ffffff';
+    const txtFill = (i%2===0) ? '#ffffff' : getCSS('--navy');
+    out += `<path d="M${cx},${cy} L${p0.x},${p0.y} A${r},${r} 0 0 1 ${p1.x},${p1.y} Z" fill="${fill}" stroke="#2e2f5b" stroke-width="2"/>`;
+    // label
+    const c = a0 + seg/2;
+    const flip = (c>90 && c<270);
+    const words = list[i].label.split(' ');
+    let l1 = list[i].label, l2 = '';
+    if(words.length>1){ const h=Math.ceil(words.length/2); l1=words.slice(0,h).join(' '); l2=words.slice(h).join(' '); }
+    const inner = flip ? `<g transform="rotate(180 150 66)">` : '';
+    const innerEnd = flip ? `</g>` : '';
+    out += `<g transform="rotate(${c} 150 150)">${inner}` +
+           `<text x="150" y="${l2?60:70}" text-anchor="middle" fill="${txtFill}" font-family="Helvetica Neue,Arial,sans-serif" font-size="13" font-weight="700">${esc(l1)}` +
+           (l2?`<tspan x="150" dy="16">${esc(l2)}</tspan>`:'') +
+           `</text>${innerEnd}</g>`;
+  }
+  svg.innerHTML = out;
+}
+function pt(cx,cy,r,deg){ const a=(deg)*Math.PI/180; return { x:cx + r*Math.sin(a), y:cy - r*Math.cos(a) }; }
+function getCSS(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+/* ---------------- spin ---------------- */
+$('spin-btn').addEventListener('click',spin);
+function spin(){
+  if(spinning) return;
+  spinning = true;
+  $('spin-btn').disabled = true;
+  const N = list.length, seg = 360/N;
+  const index = Math.floor(Math.random()*N);
+  const target = 360 - (index*seg) - seg/2;           // where the winning segment must sit (under top pointer)
+  const jitter = (Math.random()-0.5) * seg * 0.5;      // land somewhere inside the slice, not dead-centre
+  const currentMod = ((rotation % 360)+360)%360;
+  let delta = (5*360) + target + jitter - currentMod;
+  while(delta < 4*360) delta += 360;
+  rotation += delta;
+  const wheel = $('wheel');
+  if(REDUCE){
+    wheel.style.transform = `rotate(${rotation}deg)`;
+    setTimeout(()=>land(index), 250);
+  }else{
+    wheel.classList.add('spin');
+    requestAnimationFrame(()=>{ wheel.style.transform = `rotate(${rotation}deg)`; });
+    wheel.addEventListener('transitionend', function handler(){
+      wheel.removeEventListener('transitionend', handler);
+      land(index);
+    });
+  }
+}
+function land(index){
+  spinning = false;
+  $('spin-btn').disabled = false;
+  currentBreak = list[index];
+  currentPrompt = currentBreak.prompt ? makePrompt(currentBreak.prompt) : null;
+  if(currentBreak.prompt){ openPrompt(); }
+  else { goToTimer(); }
+}
+
+/* ---------------- prompt generation ---------------- */
+function makePrompt(kind){
+  if(kind==='wyr')     return { kind, text: rand(PROMPTS.wyr) };
+  if(kind==='category')return { kind, text: rand(PROMPTS.category) };
+  if(kind==='odd')     return { kind, words: rand(PROMPTS.odd) };
+  if(kind==='gratitude')return { kind, text: rand(PROMPTS.gratitude) };
+}
+function promptHTML(p){
+  if(p.kind==='wyr'){
+    const [a,b] = p.text.split(' or ');
+    return `<div class="prompt-q">Would you rather ${esc(a)} <span class="or">or</span> ${esc(b)}?</div>
+            <div class="prompt-hint">Move to a side of the room to vote, then say why.</div>`;
+  }
+  if(p.kind==='category'){
+    return `<div class="prompt-q">Category: ${esc(p.text)}</div>
+            <div class="prompt-hint">Go round the room, one answer each. No repeats, no stalling.</div>`;
+  }
+  if(p.kind==='odd'){
+    return `<div class="odd-chips">${p.words.map(w=>`<span class="odd-chip">${esc(w)}</span>`).join('')}</div>
+            <div class="prompt-hint">Which one doesn't belong? Argue for more than one answer.</div>`;
+  }
+  if(p.kind==='gratitude'){
+    return `<div class="prompt-q">Think of ${esc(p.text)}.</div>
+            <div class="prompt-hint">Picture it quietly, then share with a partner if you'd like to.</div>`;
+  }
+}
+function promptSpeech(p){
+  if(p.kind==='wyr'){ const [a,b]=p.text.split(' or '); return `Would you rather ${a}, or ${b}?`; }
+  if(p.kind==='category') return `Category: ${p.text}.`;
+  if(p.kind==='odd') return `Which one doesn't belong: ${p.words.join(', ')}?`;
+  if(p.kind==='gratitude') return `Think of ${p.text}.`;
+  return '';
+}
+
+/* ---------------- prompt modal ---------------- */
+function openPrompt(){
+  $('modal-title').textContent = currentBreak.name;
+  $('modal-kicker').textContent = 'Before you start';
+  $('prompt-box').innerHTML = promptHTML(currentPrompt);
+  $('overlay').classList.remove('hidden');
+  $('start-with-prompt').focus();
+}
+$('new-prompt').addEventListener('click',()=>{
+  currentPrompt = makePrompt(currentBreak.prompt);
+  $('prompt-box').innerHTML = promptHTML(currentPrompt);
+});
+$('modal-read').addEventListener('click',()=> speak(promptSpeech(currentPrompt)) );
+$('modal-cancel').addEventListener('click',()=>{ $('overlay').classList.add('hidden'); });
+$('start-with-prompt').addEventListener('click',()=>{ $('overlay').classList.add('hidden'); goToTimer(); });
+
+/* ---------------- timer ---------------- */
+let total=0, remaining=0, endAt=0, raf=null, running=false, finished=false;
+const R = 88, CIRC = 2*Math.PI*R;
+
+function goToTimer(){
+  finished=false;
+  total = currentBreak.secs;
+  remaining = currentBreak.secs;
+  $('timer-name').textContent = currentBreak.name;
+  $('timer-how').textContent = currentBreak.how;
+  // music player (only for breaks with a spotify id; needs internet + Spotify)
+  const frame = $('spotify-frame');
+  if(currentBreak.spotify){
+    $('music-note').textContent = currentBreak.credit || 'Music';
+    frame.src = 'https://open.spotify.com/embed/playlist/' + currentBreak.spotify + '?utm_source=generator';
+    $('music-panel').classList.remove('hidden');
+  }else{
+    frame.src = 'about:blank';   // clears any playing audio when switching breaks
+    $('music-panel').classList.add('hidden');
+  }
+  // live prompt (stays on screen during the countdown)
+  if(currentPrompt){
+    $('live-prompt').classList.remove('hidden');
+    $('lp-label').textContent = 'Prompt';
+    $('lp-body').innerHTML = promptHTML(currentPrompt);
+  }else{
+    $('live-prompt').classList.add('hidden');
+  }
+  $('ring-fg').style.strokeDasharray = CIRC;
+  $('ring-fg').style.strokeDashoffset = 0;
+  $('timesup-banner').classList.add('hidden');
+  $('timer-stage').classList.remove('timesup');
+  $('start-btn').textContent = 'Start';
+  $('time-state').textContent = 'Ready';
+  $('adjust-row').style.visibility = 'visible';
+  updateDigits();
+  show('screen-timer');
+}
+function updateDigits(){
+  $('time-digits').textContent = fmt(remaining);
+  $('len-label').textContent = fmt(total);
+  const frac = total>0 ? remaining/total : 0;
+  $('ring-fg').style.strokeDashoffset = CIRC*(1-frac);
+}
+function startTimer(){
+  if(running || finished) return;
+  running = true;
+  $('start-btn').textContent = 'Pause';
+  $('time-state').textContent = 'Running';
+  $('adjust-row').style.visibility = 'hidden';
+  endAt = Date.now() + remaining*1000;
+  loop();
+}
+function loop(){
+  remaining = (endAt - Date.now())/1000;
+  if(remaining <= 0){ remaining = 0; updateDigits(); finishTimer(); return; }
+  updateDigits();
+  raf = requestAnimationFrame(loop);
+}
+function pauseTimer(){
+  running=false;
+  cancelAnimationFrame(raf);
+  remaining = Math.max(0,(endAt - Date.now())/1000);
+  $('start-btn').textContent = 'Resume';
+  $('time-state').textContent = 'Paused';
+}
+function stopTimer(){ running=false; cancelAnimationFrame(raf); }
+function finishTimer(){
+  running=false; finished=true;
+  cancelAnimationFrame(raf);
+  $('start-btn').textContent = 'Done';
+  $('start-btn').disabled = true;
+  $('time-state').textContent = "Time's up";
+  $('timesup-banner').classList.remove('hidden');
+  $('timer-stage').classList.add('timesup');
+  chime();
+}
+$('start-btn').addEventListener('click',()=>{
+  if(finished) return;
+  running ? pauseTimer() : startTimer();
+});
+$('reset-btn').addEventListener('click',()=>{
+  stopTimer(); finished=false;
+  $('start-btn').disabled=false;
+  remaining = total;
+  $('start-btn').textContent='Start';
+  $('time-state').textContent='Ready';
+  $('adjust-row').style.visibility='visible';
+  $('timesup-banner').classList.add('hidden');
+  $('timer-stage').classList.remove('timesup');
+  updateDigits();
+});
+$('minus30').addEventListener('click',()=>{ if(running||finished)return; total=Math.max(30,total-30); remaining=total; updateDigits(); });
+$('plus30').addEventListener('click',()=>{ if(running||finished)return; total=Math.min(600,total+30); remaining=total; updateDigits(); });
+$('spin-again').addEventListener('click',()=>{ stopTimer(); stopMusic(); $('start-btn').disabled=false; show('screen-wheel'); });
+
+/* read aloud (instruction + prompt) */
+$('read-btn').addEventListener('click',()=>{
+  let t = currentBreak.name + '. ' + currentBreak.how;
+  if(currentPrompt) t += ' ' + promptSpeech(currentPrompt);
+  speak(t);
+});
+function speak(text){
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.95;
+  window.speechSynthesis.speak(u);
+}
+if(!('speechSynthesis' in window)){ $('read-btn').style.display='none'; $('modal-read').style.display='none'; }
+
+/* gentle two-note chime on finish */
+function chime(){
+  try{
+    const AC = window.AudioContext||window.webkitAudioContext;
+    const ac = new AC();
+    [660,880].forEach((f,i)=>{
+      const o=ac.createOscillator(), g=ac.createGain();
+      o.type='sine'; o.frequency.value=f; o.connect(g); g.connect(ac.destination);
+      const t=ac.currentTime + i*0.18;
+      g.gain.setValueAtTime(0.0001,t);
+      g.gain.exponentialRampToValueAtTime(0.18,t+0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+0.5);
+      o.start(t); o.stop(t+0.52);
+    });
+  }catch(e){}
+}
+
+/* close modal on overlay click / Esc */
+$('overlay').addEventListener('click',e=>{ if(e.target===$('overlay')) $('overlay').classList.add('hidden'); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') $('overlay').classList.add('hidden'); });
+</script>
+</body>
+</html>
