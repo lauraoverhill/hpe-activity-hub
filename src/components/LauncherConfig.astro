@@ -10,6 +10,11 @@ const navigationItems = themeConfig.navigation.items.filter((item) => item.type 
     <LauncherSwitch label="Dark mode" onAction="toggle-dark-mode" />
     <LauncherSwitch label="High contrast" onAction="toggle-high-contrast" />
     <LauncherSwitch label="Reduced motion" onAction="toggle-reduced-motion" />
+    <LauncherSwitch
+      label="Read aloud"
+      onAction="toggle-read-aloud"
+      keywords={['accessibility', 'speech', 'text to speech', 'tts']}
+    />
   </LauncherPreferences>
   <LauncherNav label="Navigate to">
     {

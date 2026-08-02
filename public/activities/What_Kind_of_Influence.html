@@ -129,6 +129,7 @@ build();
 <script>
 (function(){
   if(!('speechSynthesis' in window)) return;            // unsupported: add nothing
+  try{ if(localStorage.getItem('readAloud')!=='enabled') return; }catch(e){ return; }
   var wrap = document.querySelector('.wrap') || document.body;
   var h1 = wrap.querySelector('h1');
   if(!h1) return;
@@ -195,6 +196,7 @@ build();
 <script>
 (function(){
   if(!('speechSynthesis' in window)) return;
+  try{ if(localStorage.getItem('readAloud')!=='enabled') return; }catch(e){ return; }
   var root = document.querySelector('.wrap') || document.body;
 
   var hasBuckets  = document.querySelector('.sort-card') || document.querySelector('.bucket-head');
@@ -260,6 +262,13 @@ build();
     document.querySelectorAll('.bucket-head').forEach(function(head){
       if(head.querySelector('.ra-say')) return;
       head.appendChild(sayBtn(labelOf(head)));
+    });
+    document.querySelectorAll('.defs > div').forEach(function(def){
+      if(def.querySelector(':scope > .ra-say')) return;
+      var b=def.querySelector('b'), label=b?b.textContent.trim():'';
+      var rest=labelOf(def);
+      if(label && rest.indexOf(label)===0) rest=rest.slice(label.length).trim();
+      def.appendChild(sayBtn(label?(label+'. '+rest):rest));
     });
   }
 

@@ -134,6 +134,7 @@ build();
 <script>
 (function(){
   if(!('speechSynthesis' in window)) return;            // unsupported: add nothing
+  try{ if(localStorage.getItem('readAloud')!=='enabled') return; }catch(e){ return; }
   var wrap = document.querySelector('.wrap') || document.body;
   var h1 = wrap.querySelector('h1');
   if(!h1) return;
@@ -196,6 +197,71 @@ build();
 })();
 </script>
 
+<!-- Per-card read aloud for each fact card (self-contained, no libraries, no data collected) -->
+<script>
+(function(){
+  if(!('speechSynthesis' in window)) return;
+  try{ if(localStorage.getItem('readAloud')!=='enabled') return; }catch(e){ return; }
+  var root = document.querySelector('.wrap') || document.body;
+
+  if(!document.querySelector('style[data-readsay]')){
+    var st=document.createElement('style'); st.setAttribute('data-readsay','');
+    st.textContent =
+      '.ra-say{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;'+
+      'width:26px;height:26px;margin-left:8px;padding:0;border-radius:999px;cursor:pointer;'+
+      'border:1px solid var(--line,#d6deee);background:#fff;color:var(--navy,#2e2f5b);'+
+      'font-size:13px;line-height:1;vertical-align:middle;}'+
+      '.ra-say:hover{background:#f2f6fc;}'+
+      '.ra-say:focus-visible{outline:3px solid var(--navy,#2e2f5b);outline-offset:2px;}'+
+      '.ra-say[aria-pressed="true"]{background:var(--navy,#2e2f5b);color:#fff;border-color:var(--navy,#2e2f5b);}';
+    document.head.appendChild(st);
+  }
+
+  var active=null;
+  function say(text, btn){
+    try{speechSynthesis.cancel();}catch(e){}
+    if(active) active.setAttribute('aria-pressed','false');
+    if(active===btn){ active=null; return; }        // tap the same one again = stop
+    var u=new SpeechSynthesisUtterance(String(text).replace(/[’]/g,"'")); u.rate=0.95;
+    u.onend  =function(){ if(active===btn){btn.setAttribute('aria-pressed','false'); active=null;} };
+    u.onerror=function(){ if(active===btn){btn.setAttribute('aria-pressed','false'); active=null;} };
+    btn.setAttribute('aria-pressed','true'); active=btn;
+    speechSynthesis.speak(u);
+  }
+  function sayBtn(text){
+    var b=document.createElement('button');
+    b.type='button'; b.className='ra-say'; b.setAttribute('aria-pressed','false');
+    b.setAttribute('aria-label','Read aloud: '+text); b.textContent='🔊';
+    b.addEventListener('click', function(e){ e.stopPropagation(); e.preventDefault(); say(text,b); });
+    b.addEventListener('mousedown',  function(e){ e.stopPropagation(); });
+    b.addEventListener('pointerdown',function(e){ e.stopPropagation(); });
+    return b;
+  }
+  function labelOf(el){
+    var c=el.cloneNode(true);
+    c.querySelectorAll('.ra-say').forEach(function(n){n.remove();});
+    return (c.textContent||'').replace(/\s+/g,' ').trim();
+  }
+
+  function tagItems(){
+    document.querySelectorAll('.item .fact').forEach(function(fact){
+      if(fact.querySelector(':scope > .ra-say')) return;
+      fact.appendChild(sayBtn(labelOf(fact)));
+    });
+  }
+
+  var mo;
+  function retag(){ if(mo) mo.disconnect(); tagItems(); if(mo) mo.observe(root,{childList:true,subtree:true}); }
+  tagItems();
+  mo=new MutationObserver(retag);
+  mo.observe(root,{childList:true,subtree:true});
+
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden){ try{speechSynthesis.cancel();}catch(e){} if(active){active.setAttribute('aria-pressed','false'); active=null;} }
+  });
+  window.addEventListener('pagehide', function(){ try{speechSynthesis.cancel();}catch(e){} });
+})();
+</script>
 
 </body>
 </html>

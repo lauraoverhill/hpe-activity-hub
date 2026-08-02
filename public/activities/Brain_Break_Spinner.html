@@ -610,7 +610,9 @@ function speak(text){
   u.rate = 0.95;
   window.speechSynthesis.speak(u);
 }
-if(!('speechSynthesis' in window)){ $('read-btn').style.display='none'; $('modal-read').style.display='none'; }
+let raEnabled=false;
+try{ raEnabled = localStorage.getItem('readAloud')==='enabled'; }catch(e){}
+if(!('speechSynthesis' in window) || !raEnabled){ $('read-btn').style.display='none'; $('modal-read').style.display='none'; }
 
 /* gentle two-note chime on finish */
 function chime(){

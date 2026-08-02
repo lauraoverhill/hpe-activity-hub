@@ -1,0 +1,52 @@
+---
+/**
+ * Read Aloud Preference
+ *
+ * @description Site-wide accessibility preference, toggled from the Preferences
+ * launcher (see LauncherConfig.astro). Renders no UI of its own — it just persists
+ * the choice to localStorage so the read-aloud buttons on the standalone
+ * public/activities/*.html pages know whether to show themselves.
+ */
+---
+
+<script is:inline>
+  if (!window.readAloudInitialized) {
+    window.readAloudInitialized = true
+
+    const dispatchChange = (enabled) => {
+      document.dispatchEvent(
+        new CustomEvent('readaloud:change', { detail: { enabled }, bubbles: true })
+      )
+    }
+
+    const syncSwitches = (enabled) => {
+      document
+        .querySelectorAll('.launcher-switch[data-action="toggle-read-aloud"]')
+        .forEach((toggle) => toggle.setAttribute('aria-checked', enabled ? 'true' : 'false'))
+    }
+
+    const setEnabled = (enabled) => {
+      localStorage.setItem('readAloud', enabled ? 'enabled' : 'disabled')
+      syncSwitches(enabled)
+      dispatchChange(enabled)
+    }
+
+    window.readAloud = {
+      enable: () => setEnabled(true),
+      disable: () => setEnabled(false),
+      toggle: () => setEnabled(!window.readAloud.isEnabled()),
+      isEnabled: () => localStorage.getItem('readAloud') === 'enabled',
+    }
+
+    syncSwitches(window.readAloud.isEnabled())
+
+    // Integration with accessible-astro-launcher
+    document.addEventListener('launcher:action', (e) => {
+      if (e.detail?.action === 'toggle-read-aloud') window.readAloud.toggle()
+    })
+
+    // Keep the switch's LED in sync whenever the launcher is opened or a view transition lands
+    document.addEventListener('launcher:open', () => syncSwitches(window.readAloud.isEnabled()))
+    document.addEventListener('astro:page-load', () => syncSwitches(window.readAloud.isEnabled()))
+  }
+</script>

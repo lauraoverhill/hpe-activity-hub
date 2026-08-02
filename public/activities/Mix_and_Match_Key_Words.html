@@ -30,6 +30,14 @@
   @media (max-width:560px){ .cols{grid-template-columns:1fr;} }
   .colhead{font-size:11px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--blue); margin:0 0 8px;}
   .stack{display:flex; flex-direction:column; gap:10px;}
+  .tile-row{display:flex; align-items:stretch; gap:6px;}
+  .tile-row .tile{width:auto; flex:1; min-width:0;}
+  .ra-say{display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto;
+    width:26px; height:26px; align-self:center; padding:0; border-radius:999px; cursor:pointer;
+    border:1px solid var(--line); background:#fff; color:var(--navy); font-size:13px; line-height:1;}
+  .ra-say:hover{background:#f2f6fc;}
+  .ra-say:focus-visible{outline:3px solid var(--navy); outline-offset:2px;}
+  .ra-say[aria-pressed="true"]{background:var(--navy); color:#fff; border-color:var(--navy);}
   .tile{width:100%; text-align:left; background:#fff; border:1.5px solid var(--line); border-radius:12px;
     padding:13px 15px; font-size:14.5px; color:var(--ink); cursor:pointer; font-family:inherit;
     transition:border-color .12s, background .12s, transform .06s;}
@@ -46,7 +54,7 @@
   .done.show{display:block;}
 
   @media print{
-    .bar,.done{display:none !important;}
+    .bar,.done,.ra-say{display:none !important;}
     .tile{border:1px solid #999 !important; box-shadow:none !important;}
   }
 </style>
@@ -104,17 +112,56 @@ const countEl=document.getElementById('count'), doneEl=document.getElementById('
 
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
+// ── Per-tile read aloud (accessibility support; self-contained, no data collected) ──
+// The speaker sits beside each tile, not inside it, so the tile button never has to
+// nest another interactive control. Hidden unless the site's "Read aloud" accessibility
+// preference (Preferences launcher) has been switched on for this browser.
+let raEnabled=false;
+try{ raEnabled = ('speechSynthesis' in window) && localStorage.getItem('readAloud')==='enabled'; }catch(e){}
+let raActive=null;
+function raSay(text, btn){
+  if(!('speechSynthesis' in window)) return;
+  try{speechSynthesis.cancel();}catch(e){}
+  if(raActive) raActive.setAttribute('aria-pressed','false');
+  if(raActive===btn){ raActive=null; return; }
+  const u=new SpeechSynthesisUtterance(String(text).replace(/[’]/g,"'")); u.rate=0.95;
+  u.onend  =()=>{ if(raActive===btn){btn.setAttribute('aria-pressed','false'); raActive=null;} };
+  u.onerror=()=>{ if(raActive===btn){btn.setAttribute('aria-pressed','false'); raActive=null;} };
+  btn.setAttribute('aria-pressed','true'); raActive=btn;
+  speechSynthesis.speak(u);
+}
+function raButton(text){
+  const b=document.createElement('button');
+  b.type='button'; b.className='ra-say'; b.setAttribute('aria-pressed','false');
+  b.setAttribute('aria-label','Read aloud: '+text); b.textContent='🔊';
+  if(!('speechSynthesis' in window)) b.style.display='none';
+  b.addEventListener('click', e=>{ e.stopPropagation(); e.preventDefault(); raSay(text,b); });
+  b.addEventListener('mousedown',  e=>e.stopPropagation());
+  b.addEventListener('pointerdown',e=>e.stopPropagation());
+  return b;
+}
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden){ try{speechSynthesis.cancel();}catch(e){} if(raActive){raActive.setAttribute('aria-pressed','false'); raActive=null;} }
+});
+window.addEventListener('pagehide', ()=>{ try{speechSynthesis.cancel();}catch(e){} });
+
 function build(){
   selected=null; matched=0; doneEl.classList.remove('show');
   countEl.textContent = `Matched: 0 / ${TOTAL}`;
   termsEl.innerHTML=''; defsEl.innerHTML='';
   shuffle(PAIRS).forEach(p=>{
+    const row=document.createElement('div'); row.className='tile-row';
     const t=document.createElement('button'); t.className='tile term'; t.textContent=p.term; t.dataset.key=p.term;
-    t.addEventListener('click',()=>pickTerm(t)); termsEl.appendChild(t);
+    t.addEventListener('click',()=>pickTerm(t));
+    row.appendChild(t); if(raEnabled) row.appendChild(raButton(p.term));
+    termsEl.appendChild(row);
   });
   shuffle(PAIRS).forEach(p=>{
+    const row=document.createElement('div'); row.className='tile-row';
     const d=document.createElement('button'); d.className='tile def'; d.textContent=p.def; d.dataset.key=p.term;
-    d.addEventListener('click',()=>pickDef(d)); defsEl.appendChild(d);
+    d.addEventListener('click',()=>pickDef(d));
+    row.appendChild(d); if(raEnabled) row.appendChild(raButton(p.def));
+    defsEl.appendChild(row);
   });
 }
 function pickTerm(t){

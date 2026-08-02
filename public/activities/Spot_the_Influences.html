@@ -173,7 +173,9 @@ function speak(){ if(!('speechSynthesis'in window))return; stopSpeaking();
   speechSynthesis.speak(u); speaking=true; readBtn.setAttribute('aria-pressed','true'); }
 function stopSpeaking(){ if('speechSynthesis'in window)speechSynthesis.cancel(); speaking=false; readBtn.setAttribute('aria-pressed','false'); }
 readBtn.addEventListener('click',()=> speaking?stopSpeaking():speak());
-if(!('speechSynthesis'in window)) readBtn.style.display='none';
+let raEnabled=false;
+try{ raEnabled = localStorage.getItem('readAloud')==='enabled'; }catch(e){}
+if(!('speechSynthesis'in window) || !raEnabled) readBtn.style.display='none';
 
 render();
 </script>
