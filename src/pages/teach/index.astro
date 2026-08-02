@@ -1,5 +1,6 @@
 ---
 import DefaultLayout from '@layouts/DefaultLayout.astro'
+import HubCard from '@components/HubCard.astro'
 import { Heading } from 'accessible-astro-components'
 ---
 
@@ -8,7 +9,7 @@ import { Heading } from 'accessible-astro-components'
     <p class="eyebrow">For educators</p>
     <Heading level="h1">Teacher resources</Heading>
     <p>Educator-facing material will appear here. It remains public, but is clearly labelled for teacher planning and facilitation.</p>
-    <p class="empty">Teacher resources will be added as the current unit material is migrated.</p>
+    <div class="grid"><HubCard title="Illicit Drugs" description="Lesson activities with built-in answer checks and print handouts, plus a place for standards, lesson guidance and rubrics." href="/teach/units/illicit-drugs" label="Year 8 · 15 lessons" /></div>
   </section>
 </DefaultLayout>
 

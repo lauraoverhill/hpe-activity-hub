@@ -1,0 +1,29 @@
+---
+import DefaultLayout from '@layouts/DefaultLayout.astro'
+import ActivityCard from '@components/ActivityCard.astro'
+import { Accordion, AccordionItem } from 'accessible-astro-components'
+import { activities, phases } from '@data/hpe'
+---
+<DefaultLayout title="Illicit Drugs — Teacher Resources" description="Teacher-facing companion to the Year 8 Illicit Drugs unit: lesson activities, answer keys and print handouts.">
+  <div class="unit">
+    <header class="hero content"><p class="eyebrow">Year 8 Health · For educators</p><h1>Illicit Drugs <span>Unit</span></h1><p class="lede">The teacher companion to the student unit. Every lesson activity below is the same interactive task students use — most include a built-in <strong>Show answers</strong> check and a <strong>Print / Save PDF</strong> option for handouts, projection or offline use.</p><ul class="facts"><li>15 lessons</li><li>Harm minimisation approach</li><li>Same activities as students see</li></ul></header>
+    {phases.map(([title, lessons], index) => <section class="phase content"><header><p class="phase-number">{index + 1}</p><h2>{title}</h2><span>{lessons}</span></header><div class="cards">{activities.filter((activity) => activity.phase === index + 1).map((activity) => activity.file === 'Trusted_or_Not.html' ? <ActivityCard lesson={activity.lesson} type="Printable" title={activity.title} description="Printable worksheet and answer key for this lesson." href="/teach/activities/Trusted_or_Not_Printable.html" /> : <ActivityCard lesson={activity.lesson} type={activity.type} title={activity.title} description={activity.description} href={'/activities/' + activity.file} />)}</div>{(index === 3 || index === 6) && <p class="assessment">Assessment material is handed out in class.</p>}</section>)}
+    <section class="notes content" aria-labelledby="notes-heading">
+      <h2 id="notes-heading">Planning detail</h2>
+      <Accordion>
+        <AccordionItem title="Curriculum standards">
+          <p>Standards and curriculum links for this unit will be added here.</p>
+        </AccordionItem>
+        <AccordionItem title="Lesson guidance">
+          <p>Lesson-by-lesson facilitation notes will be added here.</p>
+        </AccordionItem>
+        <AccordionItem title="Rubrics">
+          <p>Assessment rubrics for the Party Safety Plan and Responding to a Friend tasks will be added here.</p>
+        </AccordionItem>
+      </Accordion>
+    </section>
+  </div>
+</DefaultLayout>
+<style>
+  .unit { background:#eef2f9; padding-block:clamp(2.25rem,6vw,5rem); } .content { margin-inline:auto; max-width:940px; padding-inline:1.35rem; } .hero { padding-bottom:clamp(2rem,5vw,4rem); } .eyebrow { color:#5b5d86; font-size:.72rem; font-weight:800; letter-spacing:.12em; margin:0 0 .6rem; text-transform:uppercase; } h1 { color:#2e2f5b; font-size:clamp(3rem,7vw,5.2rem); font-weight:900; letter-spacing:-.07em; line-height:.92; margin:0; max-width:11ch; } h1 span { background:#9fb9e4; border-radius:.35rem; padding-inline:.1em; } .lede { color:#5b5d86; font-size:1rem; line-height:1.5; margin-top:1.3rem; max-width:60ch; } .facts { color:#5b5d86; display:flex; flex-wrap:wrap; font-size:.78rem; gap:1.1rem; list-style:none; margin:1.45rem 0 0; padding:0; } .facts li::before { color:#2e2f5b; content:'•'; font-size:1.15em; margin-right:.35rem; } .phase { border-top:1px solid #cbd8ef; margin-top:2rem; padding-top:1.55rem; } .phase header { align-items:center; display:flex; flex-wrap:wrap; gap:.65rem; } .phase-number { align-items:center; background:#2e2f5b; border-radius:.38rem; color:#fff; display:inline-flex; font-size:.76rem; font-weight:800; height:1.5rem; justify-content:center; margin:0; width:1.5rem; } .phase header h2 { color:#2e2f5b; font-size:clamp(1.3rem,3vw,1.7rem); font-weight:850; letter-spacing:-.03em; line-height:1.1; margin:0; } .phase header span { color:#5b5d86; font-size:.8rem; } .cards { display:grid; gap:.85rem; grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),1fr)); margin-top:1rem; } .assessment { border-inline-start:.35rem solid #91adda; color:#5b5d86; padding-inline-start:var(--space-m); } .notes { margin-top:3rem; } .notes h2 { color:#2e2f5b; font-size:var(--step-1); margin-bottom:var(--space-m); }
+</style>
