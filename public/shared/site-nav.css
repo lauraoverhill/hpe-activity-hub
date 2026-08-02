@@ -1,0 +1,56 @@
+/* Shared site navigation bar for standalone activity pages served from public/.
+   Kept intentionally simple (no dark mode / search) since these are static
+   files outside the Astro build. See src/components/Header.astro for the
+   full site header used on Astro-rendered pages. */
+.hpe-site-nav {
+  background: #fff;
+  border-bottom: 1px solid #d6deee;
+  margin-bottom: 24px;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+.hpe-site-nav__inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 14px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 24px;
+}
+.hpe-site-nav__logo {
+  color: #2e2f5b;
+  font-weight: 700;
+  font-size: 16px;
+  text-decoration: none;
+}
+.hpe-site-nav__logo:hover {
+  text-decoration: underline;
+}
+.hpe-site-nav nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.hpe-site-nav nav a {
+  color: #2e2f5b;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.hpe-site-nav nav a:hover {
+  text-decoration: underline;
+}
+.hpe-site-nav__logo:focus-visible,
+.hpe-site-nav nav a:focus-visible {
+  outline: 3px solid #2e2f5b;
+  outline-offset: 2px;
+}
+@media print {
+  .hpe-site-nav {
+    display: none;
+  }
+}
