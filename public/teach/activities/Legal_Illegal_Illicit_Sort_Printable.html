@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Legal, Illegal or Illicit? — Printable Cards &amp; Answer Key</title>
+<style>
+  :root {
+    --ink: #2e2f5b; --paper: #eef2f9; --card-paper: #ffffff; --line: #d6deee;
+    --legal: #1f7a52;    --legal-bg: #dcf2e6;
+    --illegal: #a3243c;  --illegal-bg: #f9dee2;
+    --illicit: #c1521a;  --illicit-bg: #fbe9dc;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Iowan Old Style','Georgia',serif; background: var(--paper); color: var(--ink); }
+  .toolbar{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 20px; border-bottom:1px solid var(--line); background:#fff; font-family:'Helvetica Neue',Arial,sans-serif;}
+  .toolbar a{color:var(--ink); font-size:13.5px; font-weight:700; text-decoration:none;}
+  .toolbar a:hover{text-decoration:underline;}
+  .toolbar a:focus-visible, .print-btn:focus-visible{outline:3px solid var(--ink); outline-offset:2px;}
+  .print-btn{display:inline-flex; align-items:center; gap:7px; border:1.5px solid var(--line); background:#fff; color:var(--ink); font-family:inherit; font-size:13.5px; font-weight:700; padding:8px 16px; border-radius:999px; cursor:pointer;}
+  .print-btn:hover{background:#f2f6fc;}
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 28px 20px 60px; }
+  .eyebrow{font-family:'Helvetica Neue',Arial,sans-serif; font-size:11px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:#5b5a55;}
+  h1{font-size:30px; margin:6px 0 24px;}
+  .print-section-title { font-size: 20px; font-weight: 700; text-align: center; margin: 30px 0 6px; }
+  .print-section-sub { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12.5px; color: #5b5a55; text-align: center; max-width: 620px; margin: 0 auto 16px; line-height: 1.5; }
+  .header-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 8px; }
+  .print-header-card { border-radius: 10px; padding: 18px 10px; text-align: center; font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 0.03em; border: 2px dashed #9c9890; }
+  .print-header-card.legal { background: var(--legal-bg); color: var(--legal); }
+  .print-header-card.illegal { background: var(--illegal-bg); color: var(--illegal); }
+  .print-header-card.illicit { background: var(--illicit-bg); color: var(--illicit); }
+  .print-header-card small { display: block; font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 11px; margin-top: 6px; line-height: 1.4; }
+  .print-card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; background: var(--card-paper); border: 1px solid var(--ink); margin-top: 16px; }
+  @media (max-width: 700px) { .print-card-grid { grid-template-columns: repeat(1,1fr); } }
+  .print-sort-card { border: 1px dashed #9c9890; padding: 16px 14px; min-height: 100px; display: flex; align-items: center; justify-content: center; text-align: center; page-break-inside: avoid; background: #fff; font-size: 13px; line-height: 1.45; }
+  .answer-key { margin-top: 40px; padding-top: 20px; border-top: 3px double var(--ink); }
+  .answer-key-banner { background: var(--ink); color: var(--paper); text-align: center; padding: 10px; font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; border-radius: 8px; margin-bottom: 18px; }
+  .key-table { width: 100%; border-collapse: collapse; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12.5px; }
+  .key-table th, .key-table td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  .key-table th { background: var(--ink); color: #fff; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .key-table tr:nth-child(even) { background: #f0ede4; }
+  @media print {
+    body { background: #fff; }
+    .toolbar { display: none !important; }
+    .print-card-grid, .header-grid { border-color: #000; }
+    .answer-key { page-break-before: always; }
+    @page{margin:14mm;}
+  }
+</style>
+</head>
+<body>
+  <div class="toolbar">
+    <a href="/teach/units/illicit-drugs">&larr; Back to teacher resources</a>
+    <button type="button" class="print-btn" onclick="window.print()">🖨️ Print / Save PDF</button>
+  </div>
+  <div class="wrap">
+    <p class="eyebrow">Year 8 Health · Lesson 2 · Printable cards</p>
+    <h1>Legal, Illegal, or Illicit?</h1>
+
+    <p class="print-section-title">Step 1 — Category Headers</p>
+    <p class="print-section-sub">Cut these out and place them as headings on the desk to create three sorting zones.</p>
+    <div class="header-grid" id="header-grid"></div>
+
+    <p class="print-section-title">Step 2 — Scenario Cards</p>
+    <p class="print-section-sub">Cut out each scenario below and sort it under the correct heading: Legal, Illegal, or Illicit.</p>
+    <div class="print-card-grid" id="print-card-grid"></div>
+
+    <div class="answer-key" id="answer-key">
+      <div class="answer-key-banner">Teacher Answer Key</div>
+      <table class="key-table">
+        <thead><tr><th>Scenario</th><th>Correct Answer</th></tr></thead>
+        <tbody id="key-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+<script>
+const categories = [
+  {
+    "id": "legal",
+    "label": "Legal",
+    "sub": "Allowed by law for that person’s age"
+  },
+  {
+    "id": "illegal",
+    "label": "Illegal",
+    "sub": "Against the law for anyone"
+  },
+  {
+    "id": "illicit",
+    "label": "Illicit",
+    "sub": "Misuse of an otherwise legal drug"
+  }
+];
+const cards = [
+  {
+    "id": "s9",
+    "text": "A 20-year-old takes a pill of MDMA (ecstasy) handed to them by a stranger.",
+    "category": "illegal"
+  },
+  {
+    "id": "s4",
+    "text": "A student takes their friend’s ADHD medication before a test to help them concentrate.",
+    "category": "illicit"
+  },
+  {
+    "id": "s12",
+    "text": "Someone grows cannabis plants in their backyard to sell to friends.",
+    "category": "illegal"
+  },
+  {
+    "id": "s8",
+    "text": "A 45-year-old buys a pack of cigarettes from the servo.",
+    "category": "legal"
+  },
+  {
+    "id": "s7",
+    "text": "A person takes double their prescribed dose of sleeping tablets because they can’t fall asleep.",
+    "category": "illicit"
+  },
+  {
+    "id": "s1",
+    "text": "A 32-year-old has a glass of wine with dinner.",
+    "category": "legal"
+  },
+  {
+    "id": "s15",
+    "text": "A person injects heroin they bought from a dealer.",
+    "category": "illegal"
+  },
+  {
+    "id": "s10",
+    "text": "Someone uses their older brother’s leftover codeine painkillers instead of seeing a doctor.",
+    "category": "illicit"
+  },
+  {
+    "id": "s11",
+    "text": "Following the instructions on the box, a teenager takes paracetamol for a headache.",
+    "category": "legal"
+  },
+  {
+    "id": "s13",
+    "text": "A 17-year-old takes some of their mum’s Valium to calm their nerves before an exam.",
+    "category": "illicit"
+  },
+  {
+    "id": "s5",
+    "text": "A 16-year-old drinks a can of energy drink before their exam.",
+    "category": "legal"
+  },
+  {
+    "id": "s6",
+    "text": "Police find a small bag of cocaine in someone’s pocket at a festival.",
+    "category": "illegal"
+  },
+  {
+    "id": "s2",
+    "text": "A 15-year-old drinks a can of beer they took from the fridge without asking.",
+    "category": "illicit"
+  },
+  {
+    "id": "s14",
+    "text": "A patient is given morphine by a nurse in hospital, exactly as prescribed after surgery.",
+    "category": "legal"
+  },
+  {
+    "id": "s3",
+    "text": "A person smokes methamphetamine (\"ice\") at a party.",
+    "category": "illegal"
+  }
+];
+
+const headerGrid = document.getElementById('header-grid');
+categories.forEach(cat => {
+  const div = document.createElement('div');
+  div.className = `print-header-card ${cat.id}`;
+  div.innerHTML = `${cat.label}<small>${cat.sub}</small>`;
+  headerGrid.appendChild(div);
+});
+
+const printCardGrid = document.getElementById('print-card-grid');
+cards.forEach(card => {
+  const div = document.createElement('div');
+  div.className = 'print-sort-card';
+  div.innerHTML = `<div>${card.text}</div>`;
+  printCardGrid.appendChild(div);
+});
+
+const keyBody = document.getElementById('key-body');
+const catLabel = id => categories.find(c => c.id === id).label;
+cards.forEach(card => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${card.text}</td><td><b>${catLabel(card.category)}</b></td>`;
+  keyBody.appendChild(tr);
+});
+</script>
+</body>
+</html>

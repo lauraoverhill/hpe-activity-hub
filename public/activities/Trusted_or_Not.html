@@ -59,9 +59,11 @@ const CATS = ["Credible", "Unreliable"];
 const TOTAL = ITEMS.length;
 let correct=0, answered=0;
 const list=document.getElementById('list'), countEl=document.getElementById('count');
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function build(){
   correct=0; answered=0; countEl.textContent=`Correct: 0 / ${TOTAL}`; list.innerHTML='';
-  ITEMS.forEach((it,idx)=>{
+  shuffle(ITEMS.map((_,i)=>i)).forEach(idx=>{
+    const it=ITEMS[idx];
     const card=document.createElement('div'); card.className='item'; card.dataset.idx=idx;
     const opts=CATS.map(c=>`<button class="opt" data-cat="${c}">${c}</button>`).join('');
     card.innerHTML=`<p class="q">${it.q}</p><div class="opts">${opts}</div><div class="fb"></div>`;

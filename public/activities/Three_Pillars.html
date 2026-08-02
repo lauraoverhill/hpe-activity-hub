@@ -50,7 +50,6 @@
   <div class="bar">
     <span class="count" id="count">Correct: 0 / 12</span>
     <button class="btn" id="reset">Reset</button>
-    <button class="btn" id="reveal">Show answers</button>
   </div>
   <div id="list"></div>
 </div>
@@ -60,9 +59,11 @@ const CATS = ["Harm reduction", "Demand reduction", "Supply reduction"];
 const TOTAL = ITEMS.length;
 let correct=0, answered=0;
 const list=document.getElementById('list'), countEl=document.getElementById('count');
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function build(){
   correct=0; answered=0; countEl.textContent=`Correct: 0 / ${TOTAL}`; list.innerHTML='';
-  ITEMS.forEach((it,idx)=>{
+  shuffle(ITEMS.map((_,i)=>i)).forEach(idx=>{
+    const it=ITEMS[idx];
     const card=document.createElement('div'); card.className='item'; card.dataset.idx=idx;
     const opts=CATS.map(c=>`<button class="opt" data-cat="${c}">${c}</button>`).join('');
     card.innerHTML=`<p class="q">${it.q}</p><div class="opts">${opts}</div><div class="fb"></div>`;
@@ -79,16 +80,7 @@ function choose(card,it,btn){
     card.querySelectorAll('.opt').forEach(o=>{if(o.dataset.cat===it.a)o.classList.add('correct');}); }
   countEl.textContent=`Correct: ${correct} / ${TOTAL}`;
 }
-function reveal(){
-  list.querySelectorAll('.item').forEach(card=>{
-    if(card.classList.contains('done'))return;
-    const it=ITEMS[+card.dataset.idx]; card.classList.add('done');
-    card.querySelectorAll('.opt').forEach(o=>{if(o.dataset.cat===it.a)o.classList.add('correct');});
-    const fb=card.querySelector('.fb'); fb.className='fb right'; fb.textContent='✓ '+it.why;
-  });
-}
 document.getElementById('reset').addEventListener('click',build);
-document.getElementById('reveal').addEventListener('click',reveal);
 build();
 </script>
 
@@ -265,74 +257,6 @@ build();
 })();
 </script>
 
-<!-- Printable worksheet / Save as PDF (self-contained, no libraries) -->
-<script>
-(function(){
-if(typeof window==='undefined')return;
-function buildBody(){
-  var cats=(typeof CATS!=='undefined')?CATS:[]; var items=(typeof ITEMS!=='undefined')?ITEMS:[];
-  var optHTML=cats.map(function(c){return '<span class="opt-box"><span class="box"></span>'+esc(c)+'</span>';}).join('');
-  var list=items.map(function(it){return '<li>'+esc(it.q)+'<div class="ws-opts">'+optHTML+'</div></li>';}).join('');
-  var rows=items.map(function(it,i){return '<tr><td>'+(i+1)+'</td><td>'+esc(it.q)+'</td><td><b>'+esc(it.a)+'</b></td></tr>';}).join('');
-  var akey='<div class="ra-akey"><h3>Answer key</h3><table><tr><th>#</th><th>Statement</th><th>Answer</th></tr>'+rows+'</table></div>';
-  return '<p class="ws-intro"><b>Circle the correct category for each one.</b></p><ol class="ws-list">'+list+'</ol>'+akey;
-}
-var esc=function(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
-(function(){
-  if(document.querySelector('style[data-print]')) return;
-  var s=document.createElement('style'); s.setAttribute('data-print','');
-  s.textContent=
-  '.ra-print{display:none;}'+
-  '.ra-print-btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line,#d6deee);background:#fff;color:var(--navy,#2e2f5b);font-family:inherit;font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;cursor:pointer;margin-left:6px;}'+
-  '.ra-print-btn:hover{background:#f2f6fc;}'+
-  '.ra-print-btn:focus-visible{outline:3px solid var(--navy,#2e2f5b);outline-offset:2px;}'+
-  '@media print{'+
-    '@page{margin:14mm;}'+
-    'html,body{background:#fff !important;}'+
-    'body>*:not(.ra-print){display:none !important;}'+
-    '.ra-print{display:block !important;color:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact;font:12pt/1.45 Georgia,"Times New Roman",serif;}'+
-    '.ra-print .ws-title{font-size:19pt;margin:0 0 3mm;}'+
-    '.ra-print .ws-meta{font-size:10.5pt;margin:0 0 4mm;border-bottom:1px solid #000;padding-bottom:2.5mm;}'+
-    '.ra-print .ws-intro{font-size:11pt;margin:0 0 4mm;}'+
-    '.ra-print ol.ws-list{margin:0;padding-left:7mm;}'+
-    '.ra-print ol.ws-list>li{margin:0 0 5mm;page-break-inside:avoid;break-inside:avoid;}'+
-    '.ra-print .ws-opts{margin-top:1.5mm;}'+
-    '.ra-print .opt-box{display:inline-block;margin:0 8mm 1mm 0;font-size:11pt;}'+
-    '.ra-print .box{display:inline-block;width:4mm;height:4mm;border:1.4px solid #000;margin-right:2mm;vertical-align:-1px;border-radius:50%;}'+
-    '.ra-print .box.sq{border-radius:1px;}'+
-    '.ra-print .opt-line{margin:1.5mm 0;}'+
-    '.ra-print .fact{font-style:italic;margin:1mm 0 1.5mm;}'+
-    '.ra-print .src{font-size:10.5pt;}'+
-    '.ra-print .ws-line{border-bottom:1px solid #000;height:8mm;margin:0 0 1mm;}'+
-    '.ra-print .msgbox,.ra-print .wordbank{border:1px solid #000;padding:3mm;margin:0 0 4mm;font-size:11pt;page-break-inside:avoid;break-inside:avoid;}'+
-    '.ra-print .wordbank ul{margin:1mm 0 2mm;padding-left:6mm;}'+
-    '.ra-print .ws-graph{margin:0 0 4mm;page-break-inside:avoid;break-inside:avoid;}'+
-    '.ra-print .ws-graph svg{max-width:150mm;height:auto;}'+
-    '.ra-print .matchwrap{display:flex;gap:8mm;}'+
-    '.ra-print .matchwrap .mcol{flex:1;}'+
-    '.ra-print .matchwrap ol{padding-left:7mm;}'+
-    '.ra-print .matchwrap li{margin:0 0 3mm;page-break-inside:avoid;}'+
-    '.ra-print .sc-title{margin:0 0 1mm;}'+
-    '.ra-print .sc-text{margin:0 0 1.5mm;}'+
-    '.ra-print .ra-akey{page-break-before:always;break-before:page;}'+
-    '.ra-print .ra-akey h3{font-size:14pt;border-top:2px solid #000;padding-top:3mm;margin:0 0 3mm;}'+
-    '.ra-print .ra-akey table{border-collapse:collapse;width:100%;font-size:10.5pt;}'+
-    '.ra-print .ra-akey td,.ra-print .ra-akey th{border:1px solid #000;padding:2mm 3mm;text-align:left;vertical-align:top;}'+
-    '.ra-print .ra-akey ul{margin:0;padding-left:6mm;}'+
-  '}';
-  document.head.appendChild(s);
-})();
-var host=document.querySelector('.readrow')||document.querySelector('.bar')||document.querySelector('.toolbar')||document.querySelector('.controls');
-if(!host){host=document.createElement('div');host.className='readrow';var a=document.querySelector('.intro,.lead,h1');if(a&&a.parentNode){a.parentNode.insertBefore(host,a.nextSibling);}else{document.body.appendChild(host);}}
-var btn=document.createElement('button');btn.type='button';btn.className='ra-print-btn';btn.textContent='\uD83D\uDDA8\uFE0F Print / Save PDF';host.appendChild(btn);
-var sheet=document.createElement('div');sheet.className='ra-print';document.body.appendChild(sheet);
-var title=((document.querySelector('h1')||{}).textContent||'Worksheet').trim();
-var introRaw=((document.querySelector('.intro,.lead')||{}).textContent||'').trim();
-var intro=(/\b(tap|click|drag|drop|turns? green|lock in)\b/i.test(introRaw))?'':introRaw;
-function wordCheck(){var el=document.querySelector('.defs');if(!el)return '';var defs=el.querySelectorAll('.def');if(defs.length){var items=Array.prototype.map.call(defs,function(dd){var b=dd.querySelector('b');var term=b?b.textContent.trim():'';var rest=(dd.textContent||'').trim();if(term&&rest.indexOf(term)===0)rest=rest.slice(term.length).trim();return '<li><b>'+esc(term)+'</b> \u2014 '+esc(rest)+'</li>';}).join('');return '<div class="wordbank"><b>Word check</b><ul>'+items+'</ul></div>';}return '<div class="wordbank"><b>Word check</b><div>'+esc(el.textContent.trim())+'</div></div>';}
-function render(body){sheet.innerHTML='<h2 class="ws-title">'+esc(title)+'</h2>'+'<div class="ws-meta">Name: _____________________________    Class: ____________    Date: ____________</div>'+(intro?'<p class="ws-intro">'+esc(intro)+'</p>':'')+wordCheck()+body;}
-btn.addEventListener('click',function(){try{render(buildBody());}catch(e){render('<p>Could not build the worksheet.</p>');}window.print();});
-})();
-</script>
+
 </body>
 </html>

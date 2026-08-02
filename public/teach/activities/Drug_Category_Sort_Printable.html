@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drug Category Sort — Printable Cards &amp; Answer Key</title>
+<style>
+  :root {
+    --ink: #2e2f5b; --paper: #eef2f9; --card-paper: #ffffff; --line: #d6deee;
+    --stim: #c1521a;   --stim-bg: #fbe9dc;
+    --dep: #1f5f8b;    --dep-bg: #dcedf7;
+    --hall: #6b3fa0;   --hall-bg: #ece2f7;
+    --opi: #a3243c;    --opi-bg: #f9dee2;
+    --common: #1f7a52; --common-bg: #dcf2e6;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Iowan Old Style','Georgia',serif; background: var(--paper); color: var(--ink); }
+  .toolbar{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 20px; border-bottom:1px solid var(--line); background:#fff; font-family:'Helvetica Neue',Arial,sans-serif;}
+  .toolbar a{color:var(--ink); font-size:13.5px; font-weight:700; text-decoration:none;}
+  .toolbar a:hover{text-decoration:underline;}
+  .toolbar a:focus-visible, .print-btn:focus-visible{outline:3px solid var(--ink); outline-offset:2px;}
+  .print-btn{display:inline-flex; align-items:center; gap:7px; border:1.5px solid var(--line); background:#fff; color:var(--ink); font-family:inherit; font-size:13.5px; font-weight:700; padding:8px 16px; border-radius:999px; cursor:pointer;}
+  .print-btn:hover{background:#f2f6fc;}
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 28px 20px 60px; }
+  .eyebrow{font-family:'Helvetica Neue',Arial,sans-serif; font-size:11px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:#5b5a55;}
+  h1{font-size:30px; margin:6px 0 24px;}
+  .print-section-title { font-size: 20px; font-weight: 700; text-align: center; margin: 30px 0 6px; }
+  .print-section-sub { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12.5px; color: #5b5a55; text-align: center; max-width: 600px; margin: 0 auto 16px; line-height: 1.5; }
+  .header-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 8px; }
+  .print-header-card { border-radius: 10px; padding: 16px 8px; text-align: center; font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.03em; border: 2px dashed #9c9890; }
+  .print-header-card svg { width: 30px; height: 30px; margin-bottom: 6px; }
+  .print-header-card.stimulant { background: var(--stim-bg); color: var(--stim); }
+  .print-header-card.depressant { background: var(--dep-bg); color: var(--dep); }
+  .print-header-card.hallucinogen { background: var(--hall-bg); color: var(--hall); }
+  .print-header-card.opioid { background: var(--opi-bg); color: var(--opi); }
+  .print-header-card.common { background: var(--common-bg); color: var(--common); }
+  .print-card-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; background: var(--card-paper); border: 1px solid var(--ink); margin-top: 16px; }
+  @media (max-width: 700px) { .print-card-grid { grid-template-columns: repeat(2,1fr); } }
+  .print-sort-card { border: 1px dashed #9c9890; padding: 14px 10px; min-height: 90px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; page-break-inside: avoid; background: #fff; }
+  .print-sort-card .tag { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #9c9890; margin-bottom: 4px; }
+  .print-sort-card.drug-card { flex-direction: row; gap: 8px; text-align: left; }
+  .print-sort-card.drug-card svg { width: 24px; height: 24px; flex-shrink: 0; stroke: var(--ink); }
+  .print-sort-card .card-text { font-size: 13px; font-weight: 600; line-height: 1.3; }
+  .answer-key { margin-top: 40px; padding-top: 20px; border-top: 3px double var(--ink); }
+  .answer-key-banner { background: var(--ink); color: var(--paper); text-align: center; padding: 10px; font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: 700; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; border-radius: 8px; margin-bottom: 18px; }
+  .key-table { width: 100%; border-collapse: collapse; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13px; }
+  .key-table th, .key-table td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  .key-table th { background: var(--ink); color: #fff; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .key-table tr:nth-child(even) { background: #f0ede4; }
+  @media print {
+    body { background: #fff; }
+    .toolbar { display: none !important; }
+    .print-card-grid, .header-grid { border-color: #000; }
+    .answer-key { page-break-before: always; }
+    @page{margin:14mm;}
+  }
+</style>
+</head>
+<body>
+  <div class="toolbar">
+    <a href="/teach/units/illicit-drugs">&larr; Back to teacher resources</a>
+    <button type="button" class="print-btn" onclick="window.print()">🖨️ Print / Save PDF</button>
+  </div>
+  <div class="wrap">
+    <p class="eyebrow">Year 8 Health · Lessons 1 &amp; 8 · Printable cards</p>
+    <h1>Drug Category Sort</h1>
+
+    <p class="print-section-title">Step 1 — Category Headers</p>
+    <p class="print-section-sub">Cut these out and place them as headings on the desk or wall to create five sorting zones.</p>
+    <div class="header-grid" id="header-grid"></div>
+
+    <p class="print-section-title">Step 2 — Cards to Sort</p>
+    <p class="print-section-sub">Cut out every card below. Sort each <b>drug name</b> and each <b>effect</b> under the correct category heading.</p>
+    <div class="print-card-grid" id="print-card-grid"></div>
+
+    <div class="answer-key" id="answer-key">
+      <div class="answer-key-banner">Teacher Answer Key</div>
+      <table class="key-table">
+        <thead><tr><th>Card</th><th>Type</th><th>Correct Category</th></tr></thead>
+        <tbody id="key-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+<script>
+const icons = {
+  "coffee": "<svg viewBox=\"0 0 64 64\" fill=\"none\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M14 26h30v16a10 10 0 0 1-10 10H24a10 10 0 0 1-10-10V26Z\"/><path d=\"M44 30h4a6 6 0 0 1 0 12h-4\"/><path d=\"M20 14c0 3-3 3-3 6M28 14c0 3-3 3-3 6M36 14c0 3-3 3-3 6\"/></svg>",
+  "cigarette": "<svg viewBox=\"0 0 64 64\" fill=\"none\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"8\" y=\"28\" width=\"40\" height=\"10\" rx=\"2\"/><rect x=\"40\" y=\"28\" width=\"10\" height=\"10\" rx=\"1\"/><path d=\"M52 24c2 2 2 6 0 8M57 21c3 3 3 11 0 14\"/></svg>",
+  "mound": "<svg viewBox=\"0 0 64 64\" fill=\"none\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8 48c4-18 16-30 24-30s20 12 24 30\"/><path d=\"M8 48h48\"/><circle cx=\"32\" cy=\"24\" r=\"2\" fill=\"currentColor\" stroke=\"none\"/></svg>",
+  "wine": "<svg viewBox=\"0 0 64 64\" fill=\"none\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 10h24l-3 20a9 9 0 0 1-18 0L20 10Z\"/><path d=\"M32 34v18M22 52h20\"/></svg>",
+  "pillbottle": "<svg viewBox=\"0 0 64 64\" fill=\"none\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"18\" y=\"18\" width=\"28\" height=\"34\" rx=\"3\"/><rect x=\"24\" y=\"10\" width=\"16\" height=\"8\" rx=\"1\"/><path d=\"M18 30h28\"/></svg>",
+  "spiral": "<svg viewBox=\"0 0 64 64\" fill=\"none\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M32 32c0-4 4-6 7-3s2 8-3 9-9-3-8-9 7-11 14-9 9 12 4 17\"/></svg>",
+  "mushroom": "<svg viewBox=\"0 0 64 64\" fill=\"none\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M10 28c0-12 10-18 22-18s22 6 22 18c-6 3-16 4-22 4s-16-1-22-4Z\"/><path d=\"M26 32v14a6 6 0 0 0 12 0V32\"/></svg>",
+  "capsule": "<svg viewBox=\"0 0 64 64\" fill=\"none\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"8\" y=\"26\" width=\"48\" height=\"12\" rx=\"6\"/><path d=\"M32 26v12\"/></svg>",
+  "warning": "<svg viewBox=\"0 0 64 64\" fill=\"none\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M32 10 58 50H6L32 10Z\"/><path d=\"M32 26v14M32 46v.5\"/></svg>",
+  "bolt": "<svg viewBox=\"0 0 64 64\" fill=\"none\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M34 8 14 36h14l-4 20 22-30H32l2-18Z\"/></svg>",
+  "moon": "<svg viewBox=\"0 0 64 64\" fill=\"none\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M40 10a22 22 0 1 0 14 38 18 18 0 0 1-14-38Z\"/></svg>",
+  "eye": "<svg viewBox=\"0 0 64 64\" fill=\"none\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 32s10-16 26-16 26 16 26 16-10 16-26 16S6 32 6 32Z\"/><circle cx=\"32\" cy=\"32\" r=\"7\"/></svg>",
+  "drop": "<svg viewBox=\"0 0 64 64\" fill=\"none\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M32 8c10 14 18 24 18 34a18 18 0 0 1-36 0c0-10 8-20 18-34Z\"/></svg>"
+};
+const categories = [
+  {
+    "id": "stimulant",
+    "label": "Stimulant",
+    "icon": "bolt"
+  },
+  {
+    "id": "depressant",
+    "label": "Depressant",
+    "icon": "moon"
+  },
+  {
+    "id": "hallucinogen",
+    "label": "Hallucinogen",
+    "icon": "eye"
+  },
+  {
+    "id": "opioid",
+    "label": "Opioid",
+    "icon": "drop"
+  },
+  {
+    "id": "common",
+    "label": "Common to All Drugs",
+    "icon": "warning"
+  }
+];
+const cards = [
+  {
+    "id": "c4",
+    "type": "effect",
+    "timeTag": "Long-Term",
+    "text": "Cravings",
+    "category": "common"
+  },
+  {
+    "id": "e6",
+    "type": "effect",
+    "timeTag": "Short-Term",
+    "text": "Drowsiness and relaxation",
+    "category": "depressant"
+  },
+  {
+    "id": "e11",
+    "type": "effect",
+    "timeTag": "Long-Term",
+    "text": "Flashbacks",
+    "category": "hallucinogen"
+  },
+  {
+    "id": "e14",
+    "type": "effect",
+    "timeTag": "Short-Term",
+    "text": "Slowed breathing",
+    "category": "opioid"
+  },
+  {
+    "id": "c2",
+    "type": "effect",
+    "timeTag": "Long-Term",
+    "text": "Withdrawal symptoms when stopping",
+    "category": "common"
+  },
+  {
+    "id": "e10",
+    "type": "effect",
+    "timeTag": "Short-Term",
+    "text": "Altered sense of time",
+    "category": "hallucinogen"
+  },
+  {
+    "id": "e16",
+    "type": "effect",
+    "timeTag": "Long-Term",
+    "text": "Severe physical dependence",
+    "category": "opioid"
+  },
+  {
+    "id": "d6",
+    "type": "drug",
+    "text": "LSD",
+    "icon": "spiral",
+    "category": "hallucinogen"
+  },
+  {
+    "id": "c1",
+    "type": "effect",
+    "timeTag": "Long-Term",
+    "text": "Dependence — needing the drug to feel normal",
+    "category": "common"
+  },
+  {
+    "id": "d7",
+    "type": "drug",
+    "text": "Magic Mushrooms",
+    "icon": "mushroom",
+    "category": "hallucinogen"
+  },
+  {
+    "id": "c3",
+    "type": "effect",
+    "timeTag": "Long-Term",
+    "text": "Tolerance — needing more for the same effect",
+    "category": "common"
+  },
+  {
+    "id": "e9",
+    "type": "effect",
+    "timeTag": "Short-Term",
+    "text": "Hallucinations",
+    "category": "hallucinogen"
+  },
+  {
+    "id": "c5",
+    "type": "effect",
+    "timeTag": "Long-Term",
+    "text": "Mood and behaviour changes",
+    "category": "common"
+  },
+  {
+    "id": "e3",
+    "type": "effect",
+    "timeTag": "Long-Term",
+    "text": "Ongoing sleep problems",
+    "category": "stimulant"
+  },
+  {
+    "id": "e12",
+    "type": "effect",
+    "timeTag": "Long-Term",
+    "text": "Ongoing anxiety",
+    "category": "hallucinogen"
+  },
+  {
+    "id": "d1",
+    "type": "drug",
+    "text": "Caffeine",
+    "icon": "coffee",
+    "category": "stimulant"
+  },
+  {
+    "id": "c6",
+    "type": "effect",
+    "timeTag": "Long-Term",
+    "text": "Impact on relationships, school or work",
+    "category": "common"
+  },
+  {
+    "id": "e15",
+    "type": "effect",
+    "timeTag": "Long-Term",
+    "text": "High risk of overdose",
+    "category": "opioid"
+  },
+  {
+    "id": "d3",
+    "type": "drug",
+    "text": "Cocaine",
+    "icon": "mound",
+    "category": "stimulant"
+  },
+  {
+    "id": "d9",
+    "type": "drug",
+    "text": "Morphine",
+    "icon": "capsule",
+    "category": "opioid"
+  },
+  {
+    "id": "e8",
+    "type": "effect",
+    "timeTag": "Long-Term",
+    "text": "Liver or organ damage",
+    "category": "depressant"
+  },
+  {
+    "id": "e1",
+    "type": "effect",
+    "timeTag": "Short-Term",
+    "text": "Increased heart rate",
+    "category": "stimulant"
+  },
+  {
+    "id": "e5",
+    "type": "effect",
+    "timeTag": "Short-Term",
+    "text": "Slowed reactions",
+    "category": "depressant"
+  },
+  {
+    "id": "e4",
+    "type": "effect",
+    "timeTag": "Long-Term",
+    "text": "High blood pressure over time",
+    "category": "stimulant"
+  },
+  {
+    "id": "d8",
+    "type": "drug",
+    "text": "Heroin",
+    "icon": "capsule",
+    "category": "opioid"
+  },
+  {
+    "id": "d2",
+    "type": "drug",
+    "text": "Nicotine",
+    "icon": "cigarette",
+    "category": "stimulant"
+  },
+  {
+    "id": "d4",
+    "type": "drug",
+    "text": "Alcohol",
+    "icon": "wine",
+    "category": "depressant"
+  },
+  {
+    "id": "d10",
+    "type": "drug",
+    "text": "Codeine",
+    "icon": "capsule",
+    "category": "opioid"
+  },
+  {
+    "id": "d5",
+    "type": "drug",
+    "text": "Benzodiazepines",
+    "icon": "pillbottle",
+    "category": "depressant"
+  },
+  {
+    "id": "e2",
+    "type": "effect",
+    "timeTag": "Short-Term",
+    "text": "Feeling more alert or energetic",
+    "category": "stimulant"
+  },
+  {
+    "id": "e7",
+    "type": "effect",
+    "timeTag": "Long-Term",
+    "text": "Memory problems",
+    "category": "depressant"
+  },
+  {
+    "id": "e13",
+    "type": "effect",
+    "timeTag": "Short-Term",
+    "text": "Pain relief",
+    "category": "opioid"
+  }
+];
+
+const headerGrid = document.getElementById('header-grid');
+categories.forEach(cat => {
+  const div = document.createElement('div');
+  div.className = `print-header-card ${cat.id}`;
+  div.innerHTML = `${icons[cat.icon]}<div>${cat.label}</div>`;
+  headerGrid.appendChild(div);
+});
+
+const printCardGrid = document.getElementById('print-card-grid');
+cards.forEach(card => {
+  const div = document.createElement('div');
+  div.className = `print-sort-card ${card.type === 'drug' ? 'drug-card' : ''}`;
+  if (card.type === 'drug') {
+    div.innerHTML = `${icons[card.icon]}<div class="card-text">${card.text}</div>`;
+  } else {
+    div.innerHTML = `<div class="tag">${card.timeTag}</div><div class="card-text">${card.text}</div>`;
+  }
+  printCardGrid.appendChild(div);
+});
+
+const keyBody = document.getElementById('key-body');
+const catLabel = id => categories.find(c => c.id === id).label;
+cards.forEach(card => {
+  const tr = document.createElement('tr');
+  const typeLabel = card.type === 'drug' ? 'Drug name' : card.timeTag + ' effect';
+  tr.innerHTML = `<td>${card.text}</td><td>${typeLabel}</td><td><b>${catLabel(card.category)}</b></td>`;
+  keyBody.appendChild(tr);
+});
+</script>
+</body>
+</html>
