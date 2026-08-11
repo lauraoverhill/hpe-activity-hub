@@ -9,7 +9,7 @@ export type HpeActivity = {
 }
 
 export const phases = [
-  ['Know your drugs', 'Lessons 1–2'], ['Why people use', 'Lessons 3–4'], ['Saying no & staying safe', 'Lessons 5–6'], ['Assessment A · Party Safety Plan', 'Lesson 7'], ['Dependence & harm minimisation', 'Lessons 8–10'], ['Finding & using evidence', 'Lessons 11–14'], ['Assessment B · Responding to a Friend', 'Lesson 15'],
+  ['Know your drugs', 'Lessons 1–2'], ['Why people use', 'Lessons 3–4'], ['Saying no & staying safe', 'Lessons 5–6'], ['Assessment A · Party Safety Plan', 'Lesson 7'], ['Dependence & harm minimisation', 'Lessons 8–9'], ['Finding & using evidence', 'Lessons 10–14'], ['Assessment B · Responding to a Friend', 'Lesson 15'],
 ]
 
 export const activities: HpeActivity[] = [
@@ -23,9 +23,9 @@ export const activities: HpeActivity[] = [
   { phase: 3, lesson: 'Lesson 6', type: 'Sorter', title: 'Spot the risks', description: 'Sort risks from a party scenario into physical, social, emotional and legal.', file: 'Spot_the_Risks.html', printable: 'Spot_the_Risks_Printable.html' },
   { phase: 5, lesson: 'Lesson 8', type: 'Sort · print', title: 'Common to all drugs (revisit)', description: 'Return to the Drug Category Sort, focusing on dependence, tolerance and withdrawal — the effects shared by all drugs.', file: 'Drug_Category_Sort.html', printable: 'Drug_Category_Sort_Printable.html' },
   { phase: 5, lesson: 'Lesson 9', type: 'Sorter', title: 'The three pillars', description: 'Sort real examples into harm, demand and supply reduction.', file: 'Three_Pillars.html', printable: 'Three_Pillars_Printable.html' },
-  { phase: 5, lesson: 'Lesson 10', type: 'Check', title: 'Safe medicine check', description: 'Decide whether each action with a prescription medicine is safe or risky.', file: 'Safe_Medicine_Check.html', printable: 'Safe_Medicine_Check_Printable.html' },
-  { phase: 6, lesson: 'Lesson 11', type: 'Sorter', title: 'Trusted or not?', description: 'Sort health sources into credible and unreliable, with a reason for each.', file: 'Trusted_or_Not.html', printable: 'Trusted_or_Not_Printable.html' },
-  { phase: 6, lesson: 'Lesson 12', type: 'Data', title: 'Read the graph', description: 'Read a graph of opioid-harm trends (practice data based on AIHW) and answer questions.', file: 'Read_the_Graph.html', printable: 'Read_the_Graph_Printable.html' },
+  { phase: 6, lesson: 'Lesson 10', type: 'Sorter', title: 'Trusted or not?', description: 'Sort health sources into credible and unreliable, with a reason for each.', file: 'Trusted_or_Not.html', printable: 'Trusted_or_Not_Printable.html' },
+  { phase: 6, lesson: 'Lesson 11', type: 'Data', title: 'Read the graph', description: 'Read a graph of opioid-harm trends (practice data based on AIHW) and answer questions.', file: 'Read_the_Graph.html', printable: 'Read_the_Graph_Printable.html' },
+  { phase: 6, lesson: 'Lesson 12', type: 'Check', title: 'Safe medicine check', description: 'Decide whether each action with a prescription medicine is safe or risky.', file: 'Safe_Medicine_Check.html', printable: 'Safe_Medicine_Check_Printable.html' },
   { phase: 6, lesson: 'Lesson 13', type: 'Research', title: 'Fact finder', description: 'Pick the best way to put a reliable health fact into your own words — without copying or changing the meaning.', file: 'Fact_Finder.html', printable: 'Fact_Finder_Printable.html' },
   { phase: 6, lesson: 'Lesson 14', type: 'Builder', title: 'Respond to a friend', description: 'Build a caring, accurate reply to a friend worried about codeine, using sentence starters.', file: 'Respond_to_a_Friend.html', printable: 'Respond_to_a_Friend_Printable.html' },
 ]
